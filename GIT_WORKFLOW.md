@@ -23,6 +23,26 @@ _Актуально на 2026-04-29_
    - `gh pr create --base main --head bot/updates-init --title "<short title>" --body "<what was changed and why>"`
    - если PR уже существует — новый PR не создавать
 
+## Risk-based merge policy
+
+Авто-merge разрешён только если **все изменённые файлы** относятся к документации:
+- `*.md`
+- `docs/**`
+
+Авто-merge **запрещён**, если изменения затрагивают:
+- `scripts/**`
+- `.github/**`
+- `.env*`
+- secrets/keys
+- systemd files
+- VPN files
+- config files
+- executable files
+
+Правила действий:
+- docs-only PR: push в `bot/updates-init` → create/update PR → merge через `gh pr merge --squash --delete-branch=false`
+- любые другие изменения: create/update PR без merge, дать краткую оценку рисков и ждать ручного merge владельца
+
 ## Что делать при ошибке push
 - Остановиться
 - Не делать force-push
