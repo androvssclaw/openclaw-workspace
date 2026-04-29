@@ -4,17 +4,21 @@ _Версия: 2026-04-29_
 
 ## Ближайшие
 
-### 1) GitLab operational model
-- [ ] Выбрать модель: личный аккаунт или отдельный bot-аккаунт
-- [ ] Дать Крабу права на auto commit/push (с минимальными правами)
+### 1) GitHub operational model
+- [x] Выбрана модель отдельного bot-flow через ветку `bot/updates-init`
+- [x] Даны права и настроен auto commit/push в рабочую ветку (без push в `main`)
+- [x] Зафиксирована risk-based merge policy (auto-merge только docs-only)
 
 ### 2) Refine backup policy
-- [ ] Добавить регулярный restore-test (например, раз в месяц)
+- [x] Добавлен restore-test script: `scripts/backup_restore_test.sh`
+- [ ] Добавить регулярный cron restore-test (например, раз в месяц)
 
 ### 3) Улучшить observability
-- [ ] Расширить `health`/`logs` до компактных инцидент-отчётов
+- [x] Добавлен `scripts/incident_report.sh` (symptom/impact/cause/actions)
+- [ ] Интегрировать incident-report в ежедневный/weekly operational loop
 
 ### 4) Рутина и личная продуктивность
+- [x] Добавлен `scripts/memory_compact.sh` для сжатия долгосрочной памяти/решений
 - [ ] Reminders + task workflows + daily/weekly planning loop
 
 ---
