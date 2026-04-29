@@ -10,15 +10,20 @@ _Updated: 2026-04-29_
 
 ## 1) Backup restore-test
 - Script: `scripts/backup_restore_test.sh`
+- Cron wrapper: `scripts/restore_test_cron.sh`
+- Cron setup (idempotent): `scripts/setup_restore_test_cron.sh`
 - Default: dry-run validation (checksum + tar readability + manifest)
 - Optional: `--restore-sample` для пробного извлечения части архива во временный каталог
 - Artifact: `~/backups/openclaw/restore-tests/restore-test-*.txt`
+- History log: `state/backup_restore_test_history.log`
 
 Recommended cadence:
-- monthly restore-test via cron
+- monthly restore-test via cron (1st day, 03:20 UTC)
 
 ## 2) Observability v2
 - Script: `scripts/incident_report.sh [lines]`
+- Severity model: `OK | WARN | CRITICAL`
+- Threshold env: `DISK_WARN_PCT` (default 80), `DISK_CRIT_PCT` (default 90)
 - Output: `state/incidents/incident-*.md`
 - Формат:
   - Symptom
