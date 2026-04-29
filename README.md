@@ -57,6 +57,7 @@ _Актуально на 2026-04-28 10:02 UTC_
 - `health.sh` — единая проверка system + OpenClaw service + gateway port + VPN quick health
 - `logs.sh` — быстрый вывод статуса и журнала `openclaw-gateway.service`
 - `daily_ops_summary.sh` — сводка состояния в `state/daily_ops_summary.txt`
+- `GIT_WORKFLOW.md` — правила GitHub-процесса (ветка бота, PR-only в `main`)
 
 👉 Это рабочий переход к DevOps-ассистенту.
 
