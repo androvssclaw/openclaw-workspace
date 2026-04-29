@@ -19,7 +19,9 @@ _Актуально на 2026-04-29_
    - `git add -A`
    - `git commit -m "<clear message>"`
    - `git push origin bot/updates-init`
-5. Открыть PR из `bot/updates-init` в `main`
+5. После push автоматически создать PR в `main`:
+   - `gh pr create --base main --head bot/updates-init --title "<short title>" --body "<what was changed and why>"`
+   - если PR уже существует — новый PR не создавать
 
 ## Что делать при ошибке push
 - Остановиться
