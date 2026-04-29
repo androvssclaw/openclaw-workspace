@@ -1,0 +1,32 @@
+# --- OpenClaw runtime/state (never commit) ---
+.openclaw/
+
+# Local runtime outputs
+state/
+
+# Local backups
+backups/
+
+# Environment/secrets
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.ovpn
+*.wgconf
+*private*
+*secret*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Logs/artifacts
+*.log
+*.tmp
