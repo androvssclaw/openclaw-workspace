@@ -64,12 +64,19 @@ _Актуально на 2026-04-30 20:20 UTC_
 - `daily_ops_summary.sh` — сводка состояния в `state/daily_ops_summary.txt`
 - `daily_planning.sh` — ежедневная planning-сводка
 - `weekly_ops_review.sh` — еженедельный ops-review (health/incidents/tasks/memory)
+- `weekly_scorecard.sh` — weekly scorecard по задачам/health/proactivity
 - `incident_report.sh` — компактный инцидент-отчёт (symptom/impact/cause/actions)
 - `backup_restore_test.sh` — проверка восстанавливаемости backup (dry-run/restore-sample)
 - `memory_compact.sh` — сжатая фиксация долгосрочной памяти/решений
 - `GIT_WORKFLOW.md` — правила GitHub-процесса (ветка бота, PR-only в `main`, risk-based merge)
 
 👉 Это рабочий переход к DevOps-ассистенту.
+
+### 🧠 Backlog "мозг" (база уже внедрена)
+- `MEMORY.md` — долговременная curated memory
+- `memory/YYYY-MM-DD.md` — дневные заметки
+- `docs/PROACTIVE_PLAYBOOK.md` — правила памяти/стиля/проактивности
+- `HEARTBEAT.md` — heartbeat checklist с правилами пингов
 
 ## 📊 Уровень системы сейчас
 Оценка:
