@@ -1,12 +1,13 @@
 # OpenClaw
 
-_Актуально на 2026-04-28 10:02 UTC_
+_Актуально на 2026-04-30 20:20 UTC_
 
 ## 🧠 Что у тебя сейчас есть
 
 ### ⚙️ Инфраструктура
 - VPS (Ubuntu 24.04)
 - OpenClaw установлен и работает
+- Версия OpenClaw: `2026.4.27`
 - Gateway: `127.0.0.1:18789` (loopback-only)
 - systemd сервис настроен, включён и активен
 - gateway закреплён на системном бинарнике: `/usr/bin/openclaw` (без привязки к nvm)
@@ -56,7 +57,13 @@ _Актуально на 2026-04-28 10:02 UTC_
 - `vpn_health.sh` — runtime health-check (DNS/iface/port/traffic)
 - `health.sh` — единая проверка system + OpenClaw service + gateway port + VPN quick health
 - `logs.sh` — быстрый вывод статуса и журнала `openclaw-gateway.service`
+- `deploy.sh` — безопасный deploy/update-check workflow (требует `--confirm DEPLOY`)
+- `health_check_thresholds.sh` — проверки по порогам (disk/memory/load/service) с exit code OK/WARN/CRIT
+- `health_alert_cron.sh` — алерт в Telegram при смене статуса здоровья (OK/WARN/CRIT)
+- `setup_health_alert_cron.sh` — установка cron health-check каждые 15 минут
 - `daily_ops_summary.sh` — сводка состояния в `state/daily_ops_summary.txt`
+- `daily_planning.sh` — ежедневная planning-сводка
+- `weekly_ops_review.sh` — еженедельный ops-review (health/incidents/tasks/memory)
 - `incident_report.sh` — компактный инцидент-отчёт (symptom/impact/cause/actions)
 - `backup_restore_test.sh` — проверка восстанавливаемости backup (dry-run/restore-sample)
 - `memory_compact.sh` — сжатая фиксация долгосрочной памяти/решений
@@ -73,17 +80,19 @@ _Актуально на 2026-04-28 10:02 UTC_
 - 10 → автономный ассистент
 
 ## ⚠️ Текущие слабые места
-1. **Автоматизация пока базовая**
-   - Нужны прикладные команды (деплой, бэкапы, мониторинг, алерты)
-2. **Плановые обновления**
-   - Нужен регулярный цикл обновления OpenClaw и проверок после апдейта
+1. **Безопасный deploy в прод-потоке**
+   - Использовать `scripts/deploy.sh` только с явным подтверждением
+2. **Тонкая настройка порогов алертов**
+   - Подкрутить `DISK_WARN/CRIT`, `MEM_WARN/CRIT`, `LOAD_WARN/CRIT` под реальную нагрузку
 
 ## 🚀 Что это уже позволяет
 Прямо сейчас можно:
 - писать в Telegram и получать ответы AI
 - вести и закрывать задачи
+- ставить напоминания
 - удалённо смотреть состояние сервера
-- расширять набор команд под себя
+- получать health-алерты в Telegram при деградации
+- использовать safe deploy workflow с подтверждением
 
 👉 Это уже личный Dev-помощник на сервере.
 

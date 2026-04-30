@@ -212,3 +212,9 @@ The goal: Be helpful without being annoying. Check in a few times a day, do usef
 ## Make It Yours
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.
+
+## Documentation Hygiene
+
+- После выполнения пункта roadmap обновляй `ROADMAP.md` в том же рабочем цикле (без отдельного напоминания).
+- После добавления/изменения рабочих скриптов обновляй `README.md` (список возможностей и текущий статус).
+- Не оставляй рассинхрон "сделано по факту" vs "не отмечено в документации".
