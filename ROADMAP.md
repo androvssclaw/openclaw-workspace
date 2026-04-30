@@ -11,15 +11,15 @@ _Версия: 2026-04-29_
 
 ### 2) Refine backup policy
 - [x] Добавлен restore-test script: `scripts/backup_restore_test.sh`
-- [ ] Добавить регулярный cron restore-test (например, раз в месяц)
+- [x] Добавить регулярный cron restore-test (например, раз в месяц)
 
 ### 3) Улучшить observability
 - [x] Добавлен `scripts/incident_report.sh` (symptom/impact/cause/actions)
-- [ ] Интегрировать incident-report в ежедневный/weekly operational loop
+- [x] Интегрировать incident-report в ежедневный/weekly operational loop
 
 ### 4) Рутина и личная продуктивность
 - [x] Добавлен `scripts/memory_compact.sh` для сжатия долгосрочной памяти/решений
-- [ ] Reminders + task workflows + daily/weekly planning loop
+- [x] Reminders + task workflows + daily/weekly planning loop
 
 ---
 
