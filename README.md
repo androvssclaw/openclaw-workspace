@@ -65,6 +65,11 @@ _Актуально на 2026-04-30 20:20 UTC_
 - `daily_planning.sh` — ежедневная planning-сводка
 - `weekly_ops_review.sh` — еженедельный ops-review (health/incidents/tasks/memory)
 - `weekly_scorecard.sh` — weekly scorecard по задачам/health/proactivity
+- `focus.sh` — выбрать 1-3 приоритета из открытых задач
+- `today.sh` — сводка на сегодня (top tasks + health + reminders)
+- `ops_brief.sh` — быстрый ops-срез (health + алерты + последний incident)
+- `cleanup.sh` — weekly cleanup (memory compact + scorecard + task snapshot)
+- `task.sh next` — предложить следующую задачу автоматически
 - `incident_report.sh` — компактный инцидент-отчёт (symptom/impact/cause/actions)
 - `backup_restore_test.sh` — проверка восстанавливаемости backup (dry-run/restore-sample)
 - `memory_compact.sh` — сжатая фиксация долгосрочной памяти/решений

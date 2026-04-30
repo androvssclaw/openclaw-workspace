@@ -29,6 +29,7 @@ usage() {
   ./scripts/task.sh addp "Текст задачи"
   ./scripts/task.sh addm "Текст задачи"
   ./scripts/task.sh done <ID_задачи_или_номер_по_списку_или_часть_текста>
+  ./scripts/task.sh next
   ./scripts/task.sh list
 
 Примеры:
@@ -37,7 +38,20 @@ usage() {
   ./scripts/task.sh addm "Позвонить маме"
   ./scripts/task.sh done 23
   ./scripts/task.sh done "DNS"
+  ./scripts/task.sh next
 EOF
+}
+
+next_task() {
+  local line
+  line="$(awk '/^## Open Tasks/{flag=1;next}/^## Closed Tasks/{flag=0}flag && /^- \[ \]/{print; exit}' "$TASKS_FILE")"
+
+  if [[ -z "$line" ]]; then
+    echo "Открытых задач нет 🎉"
+    return 0
+  fi
+
+  echo "Следующая задача: $(echo "$line" | sed 's/^- \[ \] //')"
 }
 
 normalize_group() {
@@ -315,6 +329,9 @@ main() {
       else
         done_by_text "$target"
       fi
+      ;;
+    next)
+      next_task
       ;;
     list|"")
       ./scripts/tasks.sh
