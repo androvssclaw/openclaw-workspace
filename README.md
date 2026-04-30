@@ -1,6 +1,6 @@
 # OpenClaw Workspace
 
-_Актуально на 2026-04-30 22:05 UTC_
+_Актуально на 2026-04-30 22:20 UTC_
 
 ## 1) Назначение
 Этот репозиторий — рабочий контур персонального OpenClaw-ассистента: задачи, напоминания, ops-автоматизация, мониторинг и runbooks.
@@ -48,6 +48,8 @@ _Актуально на 2026-04-30 22:05 UTC_
 - `./scripts/slo_weekly_check.sh` — weekly SLO baseline check
 - `./scripts/reminder_audit.sh` — проверка просроченных one-shot reminders
 - `./scripts/reminder_weekly_audit.sh` — weekly audit reminders
+- `./scripts/test_harness.sh` — мини test harness (PASS/FAIL)
+- `./scripts/kpi_weekly.sh` — weekly KPI snapshot
 
 ### 4.3 Deploy и обслуживание
 - `./scripts/deploy.sh --confirm DEPLOY` — safe deploy (только clean tree)
@@ -57,6 +59,10 @@ _Актуально на 2026-04-30 22:05 UTC_
 - `./scripts/weekly_scorecard.sh` — weekly scorecard в `state/scorecard-YYYY-WW.md`
 - `./scripts/weekly_digest.sh` — weekly digest (tasks + ops + risks + next actions)
 - `./scripts/status_short.sh` — компактный status формат
+- `./scripts/memory_review.sh` — weekly review memory/*.md
+- `./scripts/decision_log_weekly.sh` — weekly decision log
+- `./scripts/pr_sync.sh` — create/update PR для `bot/updates-init`
+- `./scripts/git_auto_push_and_pr.sh "msg"` — commit+push+PR sync одним запуском
 - `./scripts/runbook_drill.sh` — monthly runbook drill snapshot
 - `./scripts/task_followup_cron.sh` — daily follow-up по открытым задачам (throttled)
 - `./scripts/weekly_progress_review.sh` — weekly progress review с action items
@@ -85,6 +91,9 @@ _Актуально на 2026-04-30 22:05 UTC_
 - Понедельник 06:36 UTC: `slo_weekly_check.sh`
 - Понедельник 06:37 UTC: `reminder_weekly_audit.sh`
 - Понедельник 06:38 UTC: `weekly_digest.sh`
+- Понедельник 06:39 UTC: `memory_review.sh`
+- Понедельник 06:40 UTC: `decision_log_weekly.sh`
+- Понедельник 06:41 UTC: `kpi_weekly.sh`
 - 1-е число месяца 06:40 UTC: `runbook_drill.sh`
 - 1-е число месяца 03:20 UTC: `restore_test_cron.sh`
 - VPN-monitoring: отдельные cron-задачи (`vpn_health_cron.sh`, `vpn_daily_summary.sh`)
@@ -110,6 +119,7 @@ _Актуально на 2026-04-30 22:05 UTC_
 - Backlog: выполнены пункты про память/проактивность и расширение команд
 - `ROADMAP_NEXT` — выполнен
 - `ROADMAP_NEXT_V2` — выполнен (полный проход)
+- `ROADMAP_NEXT_V3` — выполнен (полный проход)
 
 ## 9) Быстрые примеры (до/после)
 - Было: `./scripts/task.sh next`

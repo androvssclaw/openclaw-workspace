@@ -16,6 +16,8 @@ STREAK_FILE="${STATE_DIR}/health_alert_streak.txt"
 
 ALERT_CHANNEL="${ALERT_CHANNEL:-telegram}"
 ALERT_TARGET="${ALERT_TARGET:-160093873}"
+SUPPRESS_NIGHT_FROM_HOUR_UTC="${SUPPRESS_NIGHT_FROM_HOUR_UTC:-23}"
+SUPPRESS_NIGHT_TO_HOUR_UTC="${SUPPRESS_NIGHT_TO_HOUR_UTC:-8}"
 
 set +e
 output="$("${ROOT}/scripts/health_check_thresholds.sh" 2>&1)"
@@ -54,8 +56,19 @@ if [[ "$new_status" == "WARN" || "$new_status" == "CRIT" ]]; then
 fi
 
 if [[ "$new_status" != "$last_status" && $streak -ge $min_streak ]]; then
+  hour_utc="$(date -u +%H)"
+  quiet_window=0
+  if (( 10#$hour_utc >= SUPPRESS_NIGHT_FROM_HOUR_UTC || 10#$hour_utc < SUPPRESS_NIGHT_TO_HOUR_UTC )); then
+    quiet_window=1
+  fi
+
+  # Severity routing: WARN suppressed at night; CRIT always delivered.
+  if [[ "$new_status" == "WARN" && $quiet_window -eq 1 ]]; then
+    echo "[$now] warn suppressed by quiet window" >> "$LOG_FILE"
+  else
   msg="🚨 OpenClaw health status changed: ${last_status} -> ${new_status}\nTime: ${now}\n\n${output}"
   openclaw message send --channel "$ALERT_CHANNEL" --target "$ALERT_TARGET" --message "$msg" >/dev/null
+  fi
 fi
 
 echo "$new_status" > "$LAST_STATUS_FILE"

@@ -21,6 +21,13 @@ health="$(cd "$ROOT" && ./scripts/health_check_thresholds.sh 2>/dev/null || true
   echo "- Alerts tail:"
   tail -n 5 "${ROOT}/state/health_alert.log" 2>/dev/null || echo "(no alerts)"
   echo
+  echo "## KPI"
+  if [[ -f "${ROOT}/state/kpi-weekly-$(date -u +%G-%V).md" ]]; then
+    sed -n '3,20p' "${ROOT}/state/kpi-weekly-$(date -u +%G-%V).md"
+  else
+    echo "- KPI snapshot not generated yet (run ./scripts/kpi_weekly.sh)"
+  fi
+  echo
   echo "## Risks"
   echo "- Review overdue reminders via ./scripts/reminder_audit.sh"
   echo
