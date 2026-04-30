@@ -1,6 +1,6 @@
 # OpenClaw Workspace
 
-_Актуально на 2026-04-30 21:30 UTC_
+_Актуально на 2026-04-30 22:05 UTC_
 
 ## 1) Назначение
 Этот репозиторий — рабочий контур персонального OpenClaw-ассистента: задачи, напоминания, ops-автоматизация, мониторинг и runbooks.
@@ -27,7 +27,9 @@ _Актуально на 2026-04-30 21:30 UTC_
 - `./scripts/tasks.sh` — список задач
 - `./scripts/task.sh add "..." [group]` — добавить задачу
 - `./scripts/task.sh done <id|text>` — закрыть задачу
-- `./scripts/task.sh next` — предложить следующую задачу
+- `./scripts/task.sh prio <id> <p1|p2|p3>` — выставить приоритет
+- `./scripts/task.sh due <id> <YYYY-MM-DD>` — выставить дедлайн
+- `./scripts/task.sh next [work|home|errands]` — предложить следующую задачу с учетом контекста
 - `./scripts/focus.sh [count]` — top-N фокус задач
 - `./scripts/today.sh` — сводка дня (задачи + health + reminders)
 - `./scripts/remind.sh <when> <message>` — одноразовое напоминание
@@ -44,12 +46,17 @@ _Актуально на 2026-04-30 21:30 UTC_
 - `./scripts/ops_report.sh` — единый расширенный ops-report в `state/ops_report.txt`
 - `./scripts/smoke_check.sh` — smoke-check ключевых команд
 - `./scripts/slo_weekly_check.sh` — weekly SLO baseline check
+- `./scripts/reminder_audit.sh` — проверка просроченных one-shot reminders
+- `./scripts/reminder_weekly_audit.sh` — weekly audit reminders
 
 ### 4.3 Deploy и обслуживание
 - `./scripts/deploy.sh --confirm DEPLOY` — safe deploy (только clean tree)
 - `./scripts/deploy.sh --dry-run` — dry-run deploy проверки
+- `./scripts/rollback_helper.sh --to ORIG_HEAD` — безопасный helper для отката
 - `./scripts/cleanup.sh` — weekly cleanup (memory + scorecard + tasks)
 - `./scripts/weekly_scorecard.sh` — weekly scorecard в `state/scorecard-YYYY-WW.md`
+- `./scripts/weekly_digest.sh` — weekly digest (tasks + ops + risks + next actions)
+- `./scripts/status_short.sh` — компактный status формат
 - `./scripts/runbook_drill.sh` — monthly runbook drill snapshot
 - `./scripts/task_followup_cron.sh` — daily follow-up по открытым задачам (throttled)
 - `./scripts/weekly_progress_review.sh` — weekly progress review с action items
@@ -76,6 +83,8 @@ _Актуально на 2026-04-30 21:30 UTC_
 - Понедельник 06:30 UTC: `weekly_ops_review.sh`
 - Понедельник 06:35 UTC: `weekly_progress_review.sh`
 - Понедельник 06:36 UTC: `slo_weekly_check.sh`
+- Понедельник 06:37 UTC: `reminder_weekly_audit.sh`
+- Понедельник 06:38 UTC: `weekly_digest.sh`
 - 1-е число месяца 06:40 UTC: `runbook_drill.sh`
 - 1-е число месяца 03:20 UTC: `restore_test_cron.sh`
 - VPN-monitoring: отдельные cron-задачи (`vpn_health_cron.sh`, `vpn_daily_summary.sh`)
@@ -99,11 +108,17 @@ _Актуально на 2026-04-30 21:30 UTC_
 - `Week 1` — выполнено
 - `Week 2` — выполнено
 - Backlog: выполнены пункты про память/проактивность и расширение команд
+- `ROADMAP_NEXT` — выполнен
+- `ROADMAP_NEXT_V2` — выполнен (полный проход)
 
-Открытый пункт:
-- Улучшение README как живого архитектурного документа (этот апдейт закрывает пункт)
+## 9) Быстрые примеры (до/после)
+- Было: `./scripts/task.sh next`
+- Стало: `./scripts/task.sh next work` (учет `ctx:work`, `p1..p3`, `due:YYYY-MM-DD`)
 
-## 9) Быстрые проверки
+- Было: только `ops_brief`
+- Стало: `ops_brief` + `ops_report` + `status_short` + weekly digest
+
+## 10) Быстрые проверки
 ```bash
 openclaw status
 ./scripts/health_check_thresholds.sh

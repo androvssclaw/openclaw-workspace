@@ -28,27 +28,33 @@ usage() {
   ./scripts/task.sh add "Текст задачи" ["OpenClaw Project"|"Personal"|"VPN"]
   ./scripts/task.sh addp "Текст задачи"
   ./scripts/task.sh addm "Текст задачи"
+  ./scripts/task.sh prio <id> <p1|p2|p3>
+  ./scripts/task.sh due <id> <YYYY-MM-DD>
   ./scripts/task.sh done <ID_задачи_или_номер_по_списку_или_часть_текста>
-  ./scripts/task.sh next
+  ./scripts/task.sh next [work|home|errands]
   ./scripts/task.sh list
 
 Примеры:
   ./scripts/task.sh add "Купить домен" "OpenClaw Project"
   ./scripts/task.sh addp "Проверить логи"
   ./scripts/task.sh addm "Позвонить маме"
+  ./scripts/task.sh prio 12 p1
+  ./scripts/task.sh due 12 2026-05-07
   ./scripts/task.sh done 23
   ./scripts/task.sh done "DNS"
-  ./scripts/task.sh next
+  ./scripts/task.sh next work
 EOF
 }
 
 next_task() {
+  local ctx="${1:-}"
   local line
-  line="$(python3 - "$TASKS_FILE" <<'PY'
+  line="$(python3 - "$TASKS_FILE" "$ctx" <<'PY'
 import re,sys,datetime
 from pathlib import Path
 
 path=Path(sys.argv[1])
+ctx=(sys.argv[2] or '').strip().lower()
 if not path.exists():
     print("")
     raise SystemExit(0)
@@ -80,13 +86,22 @@ for raw in path.read_text(encoding='utf-8').splitlines():
         except Exception:
             pass
 
-    candidates.append((p, due_days, text))
+    c=""
+    cm=re.search(r'\bctx:(work|home|errands)\b', text, re.I)
+    if cm:
+      c=cm.group(1).lower()
+
+    ctx_penalty=0
+    if ctx:
+      ctx_penalty = 0 if c==ctx else 1
+
+    candidates.append((ctx_penalty, p, due_days, text))
 
 if not candidates:
     print("")
 else:
-    candidates.sort(key=lambda x:(x[0], x[1]))
-    print(candidates[0][2])
+    candidates.sort(key=lambda x:(x[0], x[1], x[2]))
+    print(candidates[0][3])
 PY
 )"
 
@@ -96,6 +111,64 @@ PY
   fi
 
   echo "Следующая задача: $line"
+}
+
+set_priority() {
+  local id="$1"
+  local prio="$2"
+  if ! [[ "$prio" =~ ^p[1-3]$ ]]; then
+    echo "Ошибка: prio должен быть p1|p2|p3"
+    exit 1
+  fi
+  python3 - "$TASKS_FILE" "$id" "$prio" <<'PY'
+import re,sys
+from pathlib import Path
+path=Path(sys.argv[1]); tid=sys.argv[2]; pr=sys.argv[3]
+lines=path.read_text(encoding='utf-8').splitlines()
+done=False
+for i,l in enumerate(lines):
+    if re.search(rf'(^- \[ \] #?{re.escape(tid)}\b)|(#'+re.escape(tid)+r'\b)', l):
+        if l.startswith('- [ ]') and re.search(rf'#{re.escape(tid)}\b', l):
+            l=re.sub(r'\bp[1-3]\b','',l)
+            l=re.sub(r'\s+',' ',l).rstrip()
+            lines[i]=f"{l} {pr}".rstrip()
+            done=True
+            break
+if not done:
+    print(f"Ошибка: open задача #{tid} не найдена")
+    raise SystemExit(1)
+path.write_text("\n".join(lines).rstrip()+"\n",encoding='utf-8')
+print(f"Обновил приоритет: #{tid} -> {pr}")
+PY
+}
+
+set_due() {
+  local id="$1"
+  local due="$2"
+  if ! [[ "$due" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+    echo "Ошибка: due должен быть в формате YYYY-MM-DD"
+    exit 1
+  fi
+  python3 - "$TASKS_FILE" "$id" "$due" <<'PY'
+import re,sys,datetime
+from pathlib import Path
+path=Path(sys.argv[1]); tid=sys.argv[2]; due=sys.argv[3]
+datetime.date.fromisoformat(due)
+lines=path.read_text(encoding='utf-8').splitlines()
+done=False
+for i,l in enumerate(lines):
+    if l.startswith('- [ ]') and re.search(rf'#{re.escape(tid)}\b', l):
+        l=re.sub(r'\bdue:\d{4}-\d{2}-\d{2}\b','',l)
+        l=re.sub(r'\s+',' ',l).rstrip()
+        lines[i]=f"{l} due:{due}".rstrip()
+        done=True
+        break
+if not done:
+    print(f"Ошибка: open задача #{tid} не найдена")
+    raise SystemExit(1)
+path.write_text("\n".join(lines).rstrip()+"\n",encoding='utf-8')
+print(f"Обновил дедлайн: #{tid} -> due:{due}")
+PY
 }
 
 normalize_group() {
@@ -374,8 +447,20 @@ main() {
         done_by_text "$target"
       fi
       ;;
+    prio)
+      local id="${2:-}"
+      local pr="${3:-}"
+      [[ -z "$id" || -z "$pr" ]] && { usage; exit 1; }
+      set_priority "$id" "$pr"
+      ;;
+    due)
+      local id="${2:-}"
+      local dd="${3:-}"
+      [[ -z "$id" || -z "$dd" ]] && { usage; exit 1; }
+      set_due "$id" "$dd"
+      ;;
     next)
-      next_task
+      next_task "${2:-}"
       ;;
     list|"")
       ./scripts/tasks.sh

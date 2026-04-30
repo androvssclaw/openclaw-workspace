@@ -65,6 +65,18 @@ echo "== deploy =="
 echo "branch: $branch"
 echo "upstream: $upstream"
 
+echo "> preflight: backup freshness"
+backup_log="/home/clawd/backups/openclaw/backup.log"
+if [[ -f "$backup_log" ]]; then
+  age_hours="$(( ( $(date +%s) - $(stat -c %Y "$backup_log") ) / 3600 ))"
+  echo "backup.log age: ${age_hours}h"
+  if (( age_hours > 48 )); then
+    echo "WARN: backup log older than 48h"
+  fi
+else
+  echo "WARN: backup log not found at $backup_log"
+fi
+
 echo "> pre-check: health thresholds"
 ./scripts/health_check_thresholds.sh || true
 echo "> pre-check: smoke"
@@ -85,6 +97,10 @@ openclaw status | sed -n '1,30p'
 
 echo "> post-check: health thresholds"
 ./scripts/health_check_thresholds.sh || true
+
+echo "> post-check: incident snapshot"
+incident_path="$(./scripts/incident_report.sh 120 || true)"
+echo "incident: ${incident_path}"
 
 echo "Deploy check completed."
 echo "Rollback hint: git reset --hard ORIG_HEAD  (use only if deployment introduced regressions)"
