@@ -44,14 +44,58 @@ EOF
 
 next_task() {
   local line
-  line="$(awk '/^## Open Tasks/{flag=1;next}/^## Closed Tasks/{flag=0}flag && /^- \[ \]/{print; exit}' "$TASKS_FILE")"
+  line="$(python3 - "$TASKS_FILE" <<'PY'
+import re,sys,datetime
+from pathlib import Path
+
+path=Path(sys.argv[1])
+if not path.exists():
+    print("")
+    raise SystemExit(0)
+
+today=datetime.date.today()
+open_section=False
+candidates=[]
+
+for raw in path.read_text(encoding='utf-8').splitlines():
+    s=raw.strip()
+    if s=="## Open Tasks":
+        open_section=True; continue
+    if s=="## Closed Tasks":
+        open_section=False; continue
+    if not open_section or not raw.startswith("- [ ]"):
+        continue
+
+    text=raw[len("- [ ] "):]
+    p=3
+    m=re.search(r'\bp([1-3])\b', text, re.I)
+    if m: p=int(m.group(1))
+
+    due_days=99999
+    d=re.search(r'\bdue:(\d{4}-\d{2}-\d{2})\b', text)
+    if d:
+        try:
+            dd=datetime.date.fromisoformat(d.group(1))
+            due_days=(dd-today).days
+        except Exception:
+            pass
+
+    candidates.append((p, due_days, text))
+
+if not candidates:
+    print("")
+else:
+    candidates.sort(key=lambda x:(x[0], x[1]))
+    print(candidates[0][2])
+PY
+)"
 
   if [[ -z "$line" ]]; then
     echo "Открытых задач нет 🎉"
     return 0
   fi
 
-  echo "Следующая задача: $(echo "$line" | sed 's/^- \[ \] //')"
+  echo "Следующая задача: $line"
 }
 
 normalize_group() {

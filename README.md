@@ -41,12 +41,18 @@ _Актуально на 2026-04-30 21:30 UTC_
 - `./scripts/ops_brief.sh` — короткий ops-срез
 - `./scripts/daily_ops_summary.sh` — daily ops summary в `state/`
 - `./scripts/weekly_ops_review.sh` — weekly ops review
+- `./scripts/ops_report.sh` — единый расширенный ops-report в `state/ops_report.txt`
+- `./scripts/smoke_check.sh` — smoke-check ключевых команд
+- `./scripts/slo_weekly_check.sh` — weekly SLO baseline check
 
 ### 4.3 Deploy и обслуживание
 - `./scripts/deploy.sh --confirm DEPLOY` — safe deploy (только clean tree)
 - `./scripts/deploy.sh --dry-run` — dry-run deploy проверки
 - `./scripts/cleanup.sh` — weekly cleanup (memory + scorecard + tasks)
 - `./scripts/weekly_scorecard.sh` — weekly scorecard в `state/scorecard-YYYY-WW.md`
+- `./scripts/runbook_drill.sh` — monthly runbook drill snapshot
+- `./scripts/task_followup_cron.sh` — daily follow-up по открытым задачам (throttled)
+- `./scripts/weekly_progress_review.sh` — weekly progress review с action items
 
 ### 4.4 Backup и восстановление
 - `./scripts/backup_important.sh`
@@ -64,9 +70,13 @@ _Актуально на 2026-04-30 21:30 UTC_
 
 ## 5) Cron-процессы
 - Каждые 15 минут: `health_alert_cron.sh` (алерт в Telegram при смене статуса)
+- Ежедневно 09:30 UTC: `task_followup_cron.sh`
 - Ежедневно 06:10 UTC: `daily_ops_summary.sh`
 - Ежедневно 06:20 UTC: `daily_planning.sh`
 - Понедельник 06:30 UTC: `weekly_ops_review.sh`
+- Понедельник 06:35 UTC: `weekly_progress_review.sh`
+- Понедельник 06:36 UTC: `slo_weekly_check.sh`
+- 1-е число месяца 06:40 UTC: `runbook_drill.sh`
 - 1-е число месяца 03:20 UTC: `restore_test_cron.sh`
 - VPN-monitoring: отдельные cron-задачи (`vpn_health_cron.sh`, `vpn_daily_summary.sh`)
 
@@ -75,6 +85,8 @@ _Актуально на 2026-04-30 21:30 UTC_
 - Дневные заметки: `memory/YYYY-MM-DD.md`
 - Playbook: `docs/PROACTIVE_PLAYBOOK.md`
 - Heartbeat-checklist: `HEARTBEAT.md`
+- Формат ответов команд: `docs/COMMAND_OUTPUT_STYLE.md`
+- Troubleshooting FAQ: `docs/TROUBLESHOOTING_FAQ.md`
 
 ## 7) Git policy
 - Ветка работы: `bot/updates-init`

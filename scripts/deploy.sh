@@ -8,9 +8,10 @@ Usage:
   ./scripts/deploy.sh --dry-run
 
 What it does:
-  1) git fetch --prune
-  2) fast-forward current branch from upstream
-  3) run openclaw status quick check
+  1) pre-check: health thresholds + smoke check
+  2) git fetch --prune
+  3) fast-forward current branch from upstream
+  4) post-check: openclaw status + health thresholds
 
 Safety:
   - Requires explicit confirmation token: --confirm DEPLOY
@@ -64,6 +65,11 @@ echo "== deploy =="
 echo "branch: $branch"
 echo "upstream: $upstream"
 
+echo "> pre-check: health thresholds"
+./scripts/health_check_thresholds.sh || true
+echo "> pre-check: smoke"
+./scripts/smoke_check.sh || true
+
 echo "> git fetch --prune"
 git fetch --prune
 
@@ -77,4 +83,8 @@ fi
 echo "> openclaw status (quick)"
 openclaw status | sed -n '1,30p'
 
+echo "> post-check: health thresholds"
+./scripts/health_check_thresholds.sh || true
+
 echo "Deploy check completed."
+echo "Rollback hint: git reset --hard ORIG_HEAD  (use only if deployment introduced regressions)"
