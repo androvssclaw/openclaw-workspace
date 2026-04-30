@@ -59,7 +59,7 @@ _Актуально на 2026-04-30 20:20 UTC_
 - `logs.sh` — быстрый вывод статуса и журнала `openclaw-gateway.service`
 - `deploy.sh` — безопасный deploy/update-check workflow (требует `--confirm DEPLOY`)
 - `health_check_thresholds.sh` — проверки по порогам (disk/memory/load/service) с exit code OK/WARN/CRIT
-- `health_alert_cron.sh` — алерт в Telegram при смене статуса здоровья (OK/WARN/CRIT)
+- `health_alert_cron.sh` — алерт в Telegram при смене статуса здоровья (OK/WARN/CRIT), устойчив к cron/user-bus окружению
 - `setup_health_alert_cron.sh` — установка cron health-check каждые 15 минут
 - `daily_ops_summary.sh` — сводка состояния в `state/daily_ops_summary.txt`
 - `daily_planning.sh` — ежедневная planning-сводка

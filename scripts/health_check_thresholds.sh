@@ -14,6 +14,11 @@ LOAD_WARN="${LOAD_WARN:-2.0}"
 LOAD_CRIT="${LOAD_CRIT:-4.0}"
 SERVICE="${SERVICE:-openclaw-gateway.service}"
 
+# Cron may not have user-bus env; set sane defaults for --user systemd calls.
+uid="$(id -u)"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/${uid}}"
+export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR}/bus}"
+
 status=0
 notes=()
 
@@ -28,8 +33,14 @@ add_crit() {
 }
 
 # service
-if ! systemctl --user is-active --quiet "$SERVICE"; then
-  add_crit "$SERVICE is not active"
+if ! service_state="$(systemctl --user is-active "$SERVICE" 2>/dev/null)"; then
+  if pgrep -f "openclaw.*gateway|openclaw-gateway" >/dev/null 2>&1; then
+    add_warn "systemd user bus unavailable; gateway process exists (degraded signal)"
+  else
+    add_crit "$SERVICE state unknown (user bus unavailable) and gateway process not found"
+  fi
+elif [[ "$service_state" != "active" ]]; then
+  add_crit "$SERVICE is ${service_state}"
 fi
 
 # disk /

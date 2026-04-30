@@ -5,6 +5,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STATE_DIR="${ROOT}/state"
 mkdir -p "$STATE_DIR"
 
+# Ensure user systemd bus is reachable in cron context.
+uid="$(id -u)"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/${uid}}"
+export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR}/bus}"
+
 LAST_STATUS_FILE="${STATE_DIR}/health_alert_last_status.txt"
 LOG_FILE="${STATE_DIR}/health_alert.log"
 
