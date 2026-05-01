@@ -8,6 +8,7 @@ trap 'rm -f "$TMP"' EXIT
 read -r -d '' DESIRED <<'EOF' || true
 */15 * * * * cd "${HOME}/.openclaw/workspace" && ./scripts/health_alert_cron.sh >> ./state/health_alert_cron.log 2>&1
 45 6 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/health_digest_daily.sh >> ./state/health_digest_daily.log 2>&1
+5 6 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/cron_drift_guard.sh >> ./state/cron_drift_guard_cron.log 2>&1
 10 6 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/daily_ops_summary.sh >> ./state/daily_ops_summary_cron.log 2>&1
 20 6 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/daily_planning.sh >> ./state/daily_planning_cron.log 2>&1
 30 6 * * 1 cd "${HOME}/.openclaw/workspace" && ./scripts/weekly_ops_review.sh >> ./state/weekly_ops_review_cron.log 2>&1
@@ -24,7 +25,7 @@ read -r -d '' DESIRED <<'EOF' || true
 20 3 1 * * cd "${HOME}/.openclaw/workspace" && ./scripts/restore_test_cron.sh >> ./state/restore_test_cron.log 2>&1
 EOF
 
-managed_pattern='scripts/(health_alert_cron|health_digest_daily|daily_ops_summary|daily_planning|weekly_ops_review|weekly_progress_review|slo_weekly_check|reminder_weekly_audit|weekly_digest|memory_review|decision_log_weekly|kpi_weekly|quality_trend_weekly|task_followup_cron|runbook_drill|restore_test_cron)\.sh'
+managed_pattern='scripts/(health_alert_cron|health_digest_daily|cron_drift_guard|daily_ops_summary|daily_planning|weekly_ops_review|weekly_progress_review|slo_weekly_check|reminder_weekly_audit|weekly_digest|memory_review|decision_log_weekly|kpi_weekly|quality_trend_weekly|task_followup_cron|runbook_drill|restore_test_cron)\.sh'
 
 current="$(crontab -l 2>/dev/null || true)"
 
