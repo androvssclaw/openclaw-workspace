@@ -100,3 +100,7 @@ _Версия: 2026-04-29_
 ## V6.3 — Quality Trend Safety Hotfix (2026-05-01)
 - [x] Убрана потенциальная рекурсия `quality_trend_weekly` ↔ `test_harness`
 - [x] Fallback quality checks переведены на прямые lightweight-команды
+
+## V6.4 — Cron Drift Guard (2026-05-01)
+- [x] Добавлен `cron_drift_guard.sh` (дрейф/восстановление только по смене состояния)
+- [x] Подключен ежедневный запуск через `setup_v5_cron.sh`
