@@ -68,6 +68,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/decision_log_weekly.sh` — weekly decision log
 - `./scripts/pr_sync.sh` — create/update PR для `bot/updates-init`
 - `./scripts/git_auto_push_and_pr.sh "msg"` — commit+push+PR sync одним запуском
+- `./scripts/release_evidence.sh` — единый evidence-артефакт для релиза (tests + hardening + ops)
 - `./scripts/runbook_drill.sh` — monthly runbook drill snapshot
 - `./scripts/task_followup_cron.sh` — daily follow-up по открытым задачам (throttled)
 - `./scripts/weekly_progress_review.sh` — weekly progress review с action items

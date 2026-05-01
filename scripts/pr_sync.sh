@@ -16,6 +16,28 @@ tmp_body="$(mktemp)"
 changed_files="$(git diff --name-only main...bot/updates-init 2>/dev/null || true)"
 [[ -z "$changed_files" ]] && changed_files="$(git diff --name-only HEAD~1..HEAD 2>/dev/null || true)"
 
+evidence_file=""
+evidence_block=""
+if [[ -x "./scripts/release_evidence.sh" ]]; then
+  if evidence_file="$(./scripts/release_evidence.sh 2>/dev/null)"; then
+    overall="$(grep -E '^- Overall:' "$evidence_file" | sed 's/^- Overall: //')"
+    th="$(grep -E '^authoritative_status:' "$evidence_file" | sed -n '1p' | awk '{print $2}')"
+    hd="$(grep -E '^authoritative_status:' "$evidence_file" | sed -n '2p' | awk '{print $2}')"
+    op="$(grep -E '^authoritative_status:' "$evidence_file" | sed -n '3p' | awk '{print $2}')"
+    evidence_block=$(cat <<EOF
+### Release evidence
+- File: \`${evidence_file}\`
+- Overall: ${overall:-unknown}
+- test_harness: ${th:-unknown}
+- production_hardening_dry_run: ${hd:-unknown}
+- ops_brief: ${op:-unknown}
+EOF
+)
+  else
+    evidence_block="### Release evidence\n- Failed to generate (see local run: ./scripts/release_evidence.sh)"
+  fi
+fi
+
 {
   cat .github/PULL_REQUEST_TEMPLATE.md
   echo
@@ -34,6 +56,10 @@ changed_files="$(git diff --name-only main...bot/updates-init 2>/dev/null || tru
     echo "- Script/runtime changes present: verify cron/env/exit-codes"
   else
     echo "- Mostly docs/meta changes"
+  fi
+  if [[ -n "$evidence_block" ]]; then
+    echo
+    printf '%b\n' "$evidence_block"
   fi
 } > "$tmp_body"
 
