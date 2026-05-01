@@ -96,3 +96,7 @@ _Версия: 2026-04-29_
 - [x] Weekly quality trend report (`quality_trend_weekly.sh` + history)
 - [x] Quality trend section в weekly digest
 - [x] Alert only on regression (degradation-only notifications)
+
+## V6.3 — Quality Trend Safety Hotfix (2026-05-01)
+- [x] Убрана потенциальная рекурсия `quality_trend_weekly` ↔ `test_harness`
+- [x] Fallback quality checks переведены на прямые lightweight-команды
