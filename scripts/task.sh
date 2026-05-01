@@ -28,16 +28,210 @@ usage() {
   ./scripts/task.sh add "Текст задачи" ["OpenClaw Project"|"Personal"|"VPN"]
   ./scripts/task.sh addp "Текст задачи"
   ./scripts/task.sh addm "Текст задачи"
+  ./scripts/task.sh prio <id> <p1|p2|p3>
+  ./scripts/task.sh due <id> <YYYY-MM-DD>
+  ./scripts/task.sh ctx <id> <work|home|errands>
+  ./scripts/task.sh edit <id> [p1|p2|p3] [YYYY-MM-DD] [work|home|errands]
   ./scripts/task.sh done <ID_задачи_или_номер_по_списку_или_часть_текста>
+  ./scripts/task.sh next [work|home|errands]
   ./scripts/task.sh list
 
 Примеры:
   ./scripts/task.sh add "Купить домен" "OpenClaw Project"
   ./scripts/task.sh addp "Проверить логи"
   ./scripts/task.sh addm "Позвонить маме"
+  ./scripts/task.sh prio 12 p1
+  ./scripts/task.sh due 12 2026-05-07
+  ./scripts/task.sh ctx 12 work
+  ./scripts/task.sh edit 12 p1 2026-05-07 work
   ./scripts/task.sh done 23
   ./scripts/task.sh done "DNS"
+  ./scripts/task.sh next work
 EOF
+}
+
+next_task() {
+  local ctx="${1:-}"
+  local line
+  line="$(python3 - "$TASKS_FILE" "$ctx" <<'PY'
+import re,sys,datetime
+from pathlib import Path
+
+path=Path(sys.argv[1])
+ctx=(sys.argv[2] or '').strip().lower()
+if not path.exists():
+    print("")
+    raise SystemExit(0)
+
+today=datetime.date.today()
+open_section=False
+candidates=[]
+
+for raw in path.read_text(encoding='utf-8').splitlines():
+    s=raw.strip()
+    if s=="## Open Tasks":
+        open_section=True; continue
+    if s=="## Closed Tasks":
+        open_section=False; continue
+    if not open_section or not raw.startswith("- [ ]"):
+        continue
+
+    text=raw[len("- [ ] "):]
+    p=3
+    m=re.search(r'\bp([1-3])\b', text, re.I)
+    if m: p=int(m.group(1))
+
+    due_days=99999
+    d=re.search(r'\bdue:(\d{4}-\d{2}-\d{2})\b', text)
+    if d:
+        try:
+            dd=datetime.date.fromisoformat(d.group(1))
+            due_days=(dd-today).days
+        except Exception:
+            pass
+
+    c=""
+    cm=re.search(r'\bctx:(work|home|errands)\b', text, re.I)
+    if cm:
+      c=cm.group(1).lower()
+
+    ctx_penalty=0
+    if ctx:
+      ctx_penalty = 0 if c==ctx else 1
+
+    overdue_boost = -20 if due_days < 0 else 0
+    due_rank = due_days if due_days != 99999 else 36500
+    id_match=re.search(r'#(\d+)', text)
+    task_id=int(id_match.group(1)) if id_match else 999999
+    age_rank=task_id
+
+    candidates.append((ctx_penalty, p + overdue_boost, due_rank, age_rank, text))
+
+if not candidates:
+    print("")
+else:
+    candidates.sort(key=lambda x:(x[0], x[1], x[2], x[3]))
+    print(candidates[0][4])
+PY
+)"
+
+  if [[ -z "$line" ]]; then
+    echo "Открытых задач нет 🎉"
+    return 0
+  fi
+
+  echo "Следующая задача: $line"
+}
+
+set_priority() {
+  local id="$1"
+  local prio="$2"
+  if ! [[ "$prio" =~ ^p[1-3]$ ]]; then
+    echo "Ошибка: prio должен быть p1|p2|p3"
+    exit 1
+  fi
+  python3 - "$TASKS_FILE" "$id" "$prio" <<'PY'
+import re,sys
+from pathlib import Path
+path=Path(sys.argv[1]); tid=sys.argv[2]; pr=sys.argv[3]
+lines=path.read_text(encoding='utf-8').splitlines()
+done=False
+for i,l in enumerate(lines):
+    if re.search(rf'(^- \[ \] #?{re.escape(tid)}\b)|(#'+re.escape(tid)+r'\b)', l):
+        if l.startswith('- [ ]') and re.search(rf'#{re.escape(tid)}\b', l):
+            l=re.sub(r'\bp[1-3]\b','',l)
+            l=re.sub(r'\s+',' ',l).rstrip()
+            lines[i]=f"{l} {pr}".rstrip()
+            done=True
+            break
+if not done:
+    print(f"Ошибка: open задача #{tid} не найдена")
+    raise SystemExit(1)
+path.write_text("\n".join(lines).rstrip()+"\n",encoding='utf-8')
+print(f"Обновил приоритет: #{tid} -> {pr}")
+PY
+}
+
+set_due() {
+  local id="$1"
+  local due="$2"
+  if ! [[ "$due" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+    echo "Ошибка: due должен быть в формате YYYY-MM-DD"
+    exit 1
+  fi
+  python3 - "$TASKS_FILE" "$id" "$due" <<'PY'
+import re,sys,datetime
+from pathlib import Path
+path=Path(sys.argv[1]); tid=sys.argv[2]; due=sys.argv[3]
+datetime.date.fromisoformat(due)
+lines=path.read_text(encoding='utf-8').splitlines()
+done=False
+for i,l in enumerate(lines):
+    if l.startswith('- [ ]') and re.search(rf'#{re.escape(tid)}\b', l):
+        l=re.sub(r'\bdue:\d{4}-\d{2}-\d{2}\b','',l)
+        l=re.sub(r'\s+',' ',l).rstrip()
+        lines[i]=f"{l} due:{due}".rstrip()
+        done=True
+        break
+if not done:
+    print(f"Ошибка: open задача #{tid} не найдена")
+    raise SystemExit(1)
+path.write_text("\n".join(lines).rstrip()+"\n",encoding='utf-8')
+print(f"Обновил дедлайн: #{tid} -> due:{due}")
+PY
+}
+
+set_ctx() {
+  local id="$1"
+  local ctx="$2"
+  if ! [[ "$ctx" =~ ^(work|home|errands)$ ]]; then
+    echo "Ошибка: ctx должен быть work|home|errands"
+    exit 1
+  fi
+  python3 - "$TASKS_FILE" "$id" "$ctx" <<'PY'
+import re,sys
+from pathlib import Path
+path=Path(sys.argv[1]); tid=sys.argv[2]; ctx=sys.argv[3]
+lines=path.read_text(encoding='utf-8').splitlines()
+done=False
+for i,l in enumerate(lines):
+    if l.startswith('- [ ]') and re.search(rf'#{re.escape(tid)}\b', l):
+        l=re.sub(r'\bctx:(work|home|errands)\b','',l, flags=re.I)
+        l=re.sub(r'\s+',' ',l).rstrip()
+        lines[i]=f"{l} ctx:{ctx}".rstrip()
+        done=True
+        break
+if not done:
+    print(f"Ошибка: open задача #{tid} не найдена")
+    raise SystemExit(1)
+path.write_text("\n".join(lines).rstrip()+"\n",encoding='utf-8')
+print(f"Обновил контекст: #{tid} -> ctx:{ctx}")
+PY
+}
+
+edit_task() {
+  local id="$1"; shift
+  local arg
+  local pr="" due="" ctx=""
+  for arg in "$@"; do
+    if [[ "$arg" =~ ^p[1-3]$ ]]; then
+      pr="$arg"
+    elif [[ "$arg" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+      due="$arg"
+    elif [[ "$arg" =~ ^(work|home|errands)$ ]]; then
+      ctx="$arg"
+    else
+      echo "Ошибка: неизвестный параметр edit: $arg"
+      exit 1
+    fi
+  done
+  [[ -n "$pr" ]] && set_priority "$id" "$pr"
+  [[ -n "$due" ]] && set_due "$id" "$due"
+  [[ -n "$ctx" ]] && set_ctx "$id" "$ctx"
+  if [[ -z "$pr$due$ctx" ]]; then
+    echo "Ошибка: edit требует хотя бы один параметр: p1|p2|p3, YYYY-MM-DD, work|home|errands"
+    exit 1
+  fi
 }
 
 normalize_group() {
@@ -315,6 +509,33 @@ main() {
       else
         done_by_text "$target"
       fi
+      ;;
+    prio)
+      local id="${2:-}"
+      local pr="${3:-}"
+      [[ -z "$id" || -z "$pr" ]] && { usage; exit 1; }
+      set_priority "$id" "$pr"
+      ;;
+    due)
+      local id="${2:-}"
+      local dd="${3:-}"
+      [[ -z "$id" || -z "$dd" ]] && { usage; exit 1; }
+      set_due "$id" "$dd"
+      ;;
+    ctx)
+      local id="${2:-}"
+      local cx="${3:-}"
+      [[ -z "$id" || -z "$cx" ]] && { usage; exit 1; }
+      set_ctx "$id" "$cx"
+      ;;
+    edit)
+      local id="${2:-}"
+      shift 2 || true
+      [[ -z "$id" ]] && { usage; exit 1; }
+      edit_task "$id" "$@"
+      ;;
+    next)
+      next_task "${2:-}"
       ;;
     list|"")
       ./scripts/tasks.sh

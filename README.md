@@ -1,148 +1,144 @@
-# OpenClaw
+# OpenClaw Workspace
 
-_Актуально на 2026-04-28 10:02 UTC_
+_Актуально на 2026-04-30 22:20 UTC_
 
-## 🧠 Что у тебя сейчас есть
+## 1) Назначение
+Этот репозиторий — рабочий контур персонального OpenClaw-ассистента: задачи, напоминания, ops-автоматизация, мониторинг и runbooks.
 
-### ⚙️ Инфраструктура
-- VPS (Ubuntu 24.04)
-- OpenClaw установлен и работает
-- Gateway: `127.0.0.1:18789` (loopback-only)
-- systemd сервис настроен, включён и активен
-- gateway закреплён на системном бинарнике: `/usr/bin/openclaw` (без привязки к nvm)
-- Dashboard: http://127.0.0.1:18789/
+## 2) Текущее состояние
+- OpenClaw: `2026.4.27`
+- Хост: Ubuntu 24.04 (VPS)
+- Gateway: `127.0.0.1:18789` (loopback)
+- Сервис: `openclaw-gateway.service` (systemd user, active)
+- Канал: Telegram (active)
+- Рабочая ветка: `bot/updates-init` (push в `main` запрещён)
 
-👉 Это уже постоянный backend, не временный скрипт.
+## 3) Архитектура (кратко)
+- **Интерфейс:** Telegram / Web UI
+- **Оркестрация:** OpenClaw Gateway
+- **Операционные скрипты:** `scripts/*.sh`
+- **Состояние/артефакты:** `state/*`
+- **Память:** `MEMORY.md` + `memory/YYYY-MM-DD.md`
+- **Документация/регламенты:** `README.md`, `ROADMAP.md`, `GIT_WORKFLOW.md`, `VPN*.md`
 
-### 🤖 AI / модели
-- Рабочий доступ к модели через OpenAI Codex OAuth
-- Активная модель: `gpt-5.3-codex`
-- Контекст: 200k
-- Сессия активна, кэш работает
+## 4) Операционные команды
 
-👉 У тебя живой агент, а не просто CLI.
+### 4.1 Задачи и продуктивность
+- `./scripts/tasks.sh` — список задач
+- `./scripts/task.sh add "..." [group]` — добавить задачу
+- `./scripts/task.sh done <id|text>` — закрыть задачу
+- `./scripts/task.sh prio <id> <p1|p2|p3>` — выставить приоритет
+- `./scripts/task.sh due <id> <YYYY-MM-DD>` — выставить дедлайн
+- `./scripts/task.sh ctx <id> <work|home|errands>` — выставить контекст
+- `./scripts/task.sh edit <id> [p1|p2|p3] [YYYY-MM-DD] [work|home|errands]` — массовое редактирование полей
+- `./scripts/task.sh next [work|home|errands]` — предложить следующую задачу с учетом контекста
+- `./scripts/focus.sh [count]` — top-N фокус задач
+- `./scripts/today.sh` — сводка дня (задачи + health + reminders)
+- `./scripts/remind.sh <when> <message>` — одноразовое напоминание
+- `./scripts/daily_planning.sh` — daily planning snapshot
 
-### 💬 Канал общения
-- Telegram подключен и в статусе OK
-- Аккаунт Telegram: 1/1 активен
-- Есть webchat/control UI для админки
+### 4.2 Ops и наблюдаемость
+- `./scripts/health.sh` — system + OpenClaw + VPN quick check
+- `./scripts/health_check_thresholds.sh` — threshold check (OK/WARN/CRIT)
+- `./scripts/logs.sh [lines]` — системные логи gateway
+- `./scripts/incident_report.sh [lines]` — incident snapshot в markdown
+- `./scripts/ops_brief.sh` — короткий ops-срез
+- `./scripts/daily_ops_summary.sh` — daily ops summary в `state/`
+- `./scripts/weekly_ops_review.sh` — weekly ops review
+- `./scripts/ops_report.sh` — единый расширенный ops-report в `state/ops_report.txt`
+- `./scripts/smoke_check.sh` — smoke-check ключевых команд
+- `./scripts/slo_weekly_check.sh` — weekly SLO baseline check
+- `./scripts/reminder_audit.sh` — проверка просроченных one-shot reminders
+- `./scripts/reminder_weekly_audit.sh` — weekly audit reminders
+- `./scripts/test_harness.sh` — мини test harness (PASS/FAIL)
+- `./scripts/production_hardening_dry_run.sh` — dry-run цепочка weekly/monthly сценариев
+- `./scripts/kpi_weekly.sh` — weekly KPI snapshot
+- `./scripts/health_digest_daily.sh` — daily health digest (агрегат шум/статус)
 
-👉 Это уже удалённый интерфейс к серверу.
+### 4.3 Deploy и обслуживание
+- `./scripts/deploy.sh --confirm DEPLOY` — safe deploy (только clean tree)
+- `./scripts/deploy.sh --dry-run` — dry-run deploy проверки
+- `./scripts/rollback_helper.sh --to ORIG_HEAD` — безопасный helper для отката
+- `./scripts/cleanup.sh` — weekly cleanup (memory + scorecard + tasks)
+- `./scripts/weekly_scorecard.sh` — weekly scorecard в `state/scorecard-YYYY-WW.md`
+- `./scripts/weekly_digest.sh` — weekly digest (tasks + ops + risks + next actions)
+- `./scripts/status_short.sh` — компактный status формат
+- `./scripts/memory_review.sh` — weekly review memory/*.md
+- `./scripts/decision_log_weekly.sh` — weekly decision log
+- `./scripts/pr_sync.sh` — create/update PR для `bot/updates-init`
+- `./scripts/git_auto_push_and_pr.sh "msg"` — commit+push+PR sync одним запуском
+- `./scripts/runbook_drill.sh` — monthly runbook drill snapshot
+- `./scripts/task_followup_cron.sh` — daily follow-up по открытым задачам (throttled)
+- `./scripts/weekly_progress_review.sh` — weekly progress review с action items
 
-### 🔐 Безопасность (частично)
-- Gateway слушает только `127.0.0.1` (не торчит наружу напрямую)
-- Работает политика ограниченного доступа (allowlist в текущей схеме)
-- Есть 1 предупреждение в security audit: не настроены trusted proxies (важно только при reverse proxy)
+### 4.4 Backup и восстановление
+- `./scripts/backup_important.sh`
+- `./scripts/backup_prune.sh`
+- `./scripts/backup_gdrive_sync.sh`
+- `./scripts/backup_restore_test.sh`
+- `./scripts/restore_test_cron.sh`
 
-### 🧩 Агент (самое важное)
-Структура уже есть:
-- `IDENTITY.md` — кто он
-- `USER.md` — кто ты
-- `SYSTEM.md` — поведение
-- `SOUL.md` — стиль и характер
-- `TASKS.md` — задачи
-- `TOOLS.md` — локальные команды/шпаргалка
-- `workspace/` — рабочая память и скрипты
+### 4.5 VPN
+- `./scripts/vpn_status.sh`
+- `./scripts/vpn_health.sh`
+- `./scripts/vpn_health_cron.sh`
+- `./scripts/vpn_daily_summary.sh`
+- Runbooks: `VPN.md`, `VPN_ANTI_BLOCK_RUNBOOK.md`, `VPN_ANTI_BLOCK_RUNBOOK_SHORT.md`
 
-👉 Это уже настраиваемый ассистент, не просто бот.
+## 5) Cron-процессы
+- Каждые 15 минут: `health_alert_cron.sh` (алерт в Telegram при смене статуса)
+- Daily digest (рекомендуемо 1 раз/день): `health_digest_daily.sh`
+- Ежедневно 09:30 UTC: `task_followup_cron.sh`
+- Ежедневно 06:10 UTC: `daily_ops_summary.sh`
+- Ежедневно 06:20 UTC: `daily_planning.sh`
+- Понедельник 06:30 UTC: `weekly_ops_review.sh`
+- Понедельник 06:35 UTC: `weekly_progress_review.sh`
+- Понедельник 06:36 UTC: `slo_weekly_check.sh`
+- Понедельник 06:37 UTC: `reminder_weekly_audit.sh`
+- Понедельник 06:38 UTC: `weekly_digest.sh`
+- Понедельник 06:39 UTC: `memory_review.sh`
+- Понедельник 06:40 UTC: `decision_log_weekly.sh`
+- Понедельник 06:41 UTC: `kpi_weekly.sh`
+- 1-е число месяца 06:40 UTC: `runbook_drill.sh`
+- 1-е число месяца 03:20 UTC: `restore_test_cron.sh`
+- VPN-monitoring: отдельные cron-задачи (`vpn_health_cron.sh`, `vpn_daily_summary.sh`)
 
-### 🛠 Автоматизация (текущий уровень)
-- Есть папка `scripts/`
-- `status.sh` — системный статус
-- `tasks.sh` — чтение списка задач из `TASKS.md` (с автосозданием файла)
-- `task.sh` — управление задачами (`add`, `done`, `list`)
-- `remind.sh` — одноразовые напоминания через OpenClaw cron (`<when> <message>`)
-- `vpn_status.sh` — read-only compatibility check для AmneziaWG
-- `vpn_health.sh` — runtime health-check (DNS/iface/port/traffic)
-- `health.sh` — единая проверка system + OpenClaw service + gateway port + VPN quick health
-- `logs.sh` — быстрый вывод статуса и журнала `openclaw-gateway.service`
-- `daily_ops_summary.sh` — сводка состояния в `state/daily_ops_summary.txt`
-- `incident_report.sh` — компактный инцидент-отчёт (symptom/impact/cause/actions)
-- `backup_restore_test.sh` — проверка восстанавливаемости backup (dry-run/restore-sample)
-- `memory_compact.sh` — сжатая фиксация долгосрочной памяти/решений
-- `GIT_WORKFLOW.md` — правила GitHub-процесса (ветка бота, PR-only в `main`, risk-based merge)
+## 6) Память и проактивность
+- Долгая память: `MEMORY.md`
+- Дневные заметки: `memory/YYYY-MM-DD.md`
+- Playbook: `docs/PROACTIVE_PLAYBOOK.md`
+- Heartbeat-checklist: `HEARTBEAT.md`
+- Формат ответов команд: `docs/COMMAND_OUTPUT_STYLE.md`
+- Troubleshooting FAQ: `docs/TROUBLESHOOTING_FAQ.md`
+- Quick runbook: `docs/RUNBOOK_QUICK_ACTIONS.md`
 
-👉 Это рабочий переход к DevOps-ассистенту.
+## 7) Git policy
+- Ветка работы: `bot/updates-init`
+- После коммита: автоматический push в `bot/updates-init`
+- В `main` только через PR
+- Auto-merge только docs-only (см. `GIT_WORKFLOW.md`)
 
-## 📊 Уровень системы сейчас
-Оценка:
-- 0 → ничего
-- 3 → просто бот
-- 5 → API + сервер
-- **7 → текущий уровень**
-- 10 → автономный ассистент
+## 8) Roadmap status
+- `Ближайшие` — выполнено
+- `Week 1` — выполнено
+- `Week 2` — выполнено
+- Backlog: выполнены пункты про память/проактивность и расширение команд
+- `ROADMAP_NEXT` — выполнен
+- `ROADMAP_NEXT_V2` — выполнен (полный проход)
+- `ROADMAP_NEXT_V3` — выполнен (полный проход)
+- `V4 (stabilization + product mode)` — in progress, базовые пункты внедрены
 
-## ⚠️ Текущие слабые места
-1. **Автоматизация пока базовая**
-   - Нужны прикладные команды (деплой, бэкапы, мониторинг, алерты)
-2. **Плановые обновления**
-   - Нужен регулярный цикл обновления OpenClaw и проверок после апдейта
+## 9) Быстрые примеры (до/после)
+- Было: `./scripts/task.sh next`
+- Стало: `./scripts/task.sh next work` (учет `ctx:work`, `p1..p3`, `due:YYYY-MM-DD`)
 
-## 🚀 Что это уже позволяет
-Прямо сейчас можно:
-- писать в Telegram и получать ответы AI
-- вести и закрывать задачи
-- удалённо смотреть состояние сервера
-- расширять набор команд под себя
+- Было: только `ops_brief`
+- Стало: `ops_brief` + `ops_report` + `status_short` + weekly digest
 
-👉 Это уже личный Dev-помощник на сервере.
-
-## 🧭 Куда идти дальше (логично)
-
-### 1) Сделать ассистента полезнее в быту
-- ежедневное планирование
-- приоритизация задач
-- напоминания/фоллоу-апы
-
-### 2) Усилить автоматизацию
-- деплой-команды
-- healthcheck/мониторинг
-- логирование и алерты
-
-### 3) Прокачать “мозг”
-- нормальная память (что важно держать в долгую)
-- стабильный стиль ответов
-- более проактивные действия (без спама)
-
-## 🔐 VPN (AmneziaWG 2.0): текущее понимание
-
-_Актуально на 2026-04-28 09:26 UTC_
-
-Ключевое, что важно зафиксировать:
-- архитектура сейчас: `iPhone → vpn.veltemio.com → Cloudflare DNS (DNS only) → 178.104.226.202 → AmneziaWG`
-- клиент больше не привязан к «голому» IP: endpoint на домене
-- на хосте активен интерфейс `amn0` (а не `wg0`) — это Amnezia/Docker-схема
-- трафик по `amn0` подтверждён (RX/TX растут)
-
-Быстрый вывод: схема рабочая и устойчивая к смене внешнего IP через обновление DNS `A` записи.
-
-Автомониторинг сейчас (low-cost, без LLM):
-- системный cron раз в 2 часа: `scripts/vpn_health_cron.sh`
-- системный cron daily summary в 18:00 UTC: `scripts/vpn_daily_summary.sh`
-- логи/сводки в `state/` (`vpn_health.log`, `vpn_health_daily_summary.txt`)
-
-Подробный VPN runbook и проверки см. в `VPN.md`.
-
-В `VPN.md` зафиксирован аварийный операционный чеклист, включая:
-- переключение на 2 резервных клиентских профиля
-- TTL policy (`1 min` для failover / `Auto` после стабилизации)
-- плановый reboot VPS с пост-проверкой VPN
-
-Статус на сейчас:
-- резервные профили `backup-01` и `backup-02` созданы и проверены
-- плановый reboot VPS выполнен, post-check VPN успешный
-
-Также в `VPN.md` добавлен шаблон для task 23:
-- имена резервных профилей
-- где хранить профили безопасно
-- как тестировать каждый профиль
-
-Исторические anti-block инструкции:
-- `VPN_ANTI_BLOCK_RUNBOOK.md`
-- `VPN_ANTI_BLOCK_RUNBOOK_SHORT.md`
-
-## Уже есть (пример)
-
-User: `Запусти status`
-
-Bot: `Готово, status запущен. Коротко: • Аптайм: 4ч 08м • Load average: 0.00 / 0.06 / 0.02 • Диск /: 5.2G из 38G (15%) • RAM: 968Mi из 3.7Gi (доступно ~2.8Gi) • Swap: нет (0B)`
+## 10) Быстрые проверки
+```bash
+openclaw status
+./scripts/health_check_thresholds.sh
+./scripts/ops_brief.sh
+./scripts/today.sh
+```
