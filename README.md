@@ -51,7 +51,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/slo_weekly_check.sh` — weekly SLO baseline check
 - `./scripts/reminder_audit.sh` — проверка просроченных one-shot reminders
 - `./scripts/reminder_weekly_audit.sh` — weekly audit reminders
-- `./scripts/test_harness.sh` — мини test harness (PASS/FAIL)
+- `./scripts/test_harness.sh` — мини test harness (PASS/FAIL, включая `task.sh lint`)
 - `./scripts/production_hardening_dry_run.sh` — dry-run цепочка weekly/monthly сценариев
 - `./scripts/kpi_weekly.sh` — weekly KPI snapshot
 - `./scripts/health_digest_daily.sh` — daily health digest (агрегат шум/статус)
@@ -62,7 +62,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/rollback_helper.sh --to ORIG_HEAD` — безопасный helper для отката
 - `./scripts/cleanup.sh` — weekly cleanup (memory + scorecard + tasks)
 - `./scripts/weekly_scorecard.sh` — weekly scorecard в `state/scorecard-YYYY-WW.md`
-- `./scripts/weekly_digest.sh` — weekly digest (tasks + ops + risks + next actions)
+- `./scripts/weekly_digest.sh` — weekly digest (tasks + ops + KPI + release evidence + next actions)
 - `./scripts/status_short.sh` — компактный status формат
 - `./scripts/memory_review.sh` — weekly review memory/*.md
 - `./scripts/decision_log_weekly.sh` — weekly decision log
@@ -72,7 +72,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/runbook_drill.sh` — monthly runbook drill snapshot
 - `./scripts/task_followup_cron.sh` — daily follow-up по открытым задачам (throttled)
 - `./scripts/weekly_progress_review.sh` — weekly progress review с action items
-- `./scripts/setup_v5_cron.sh [install|check]` — единая idempotent установка/проверка полного cron-набора
+- `./scripts/setup_v5_cron.sh [install|check|dry-run]` — единая idempotent установка/проверка/дифф cron-набора
 
 ### 4.4 Backup и восстановление
 - `./scripts/backup_important.sh`

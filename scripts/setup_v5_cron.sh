@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MODE="${1:-install}" # install|check
+MODE="${1:-install}" # install|check|dry-run
 TMP="$(mktemp)"
 trap 'rm -f "$TMP"' EXIT
 
@@ -43,6 +43,21 @@ if [[ "$MODE" == "check" ]]; then
   fi
   echo "FAIL: missing entries=$missing"
   exit 1
+fi
+
+if [[ "$MODE" == "dry-run" ]]; then
+  printf '%s\n' "$current" | grep -Ev "$managed_pattern" > "$TMP" || true
+  printf '%s\n' "$DESIRED" >> "$TMP"
+  awk 'NF{print} !NF{if(!blank){print}; blank=1; next} {blank=0}' "$TMP" > "${TMP}.clean"
+  mv "${TMP}.clean" "$TMP"
+
+  CUR="$(mktemp)"
+  trap 'rm -f "$TMP" "$CUR"' EXIT
+  printf '%s\n' "$current" > "$CUR"
+  if diff -u "$CUR" "$TMP"; then
+    echo "No cron changes needed."
+  fi
+  exit 0
 fi
 
 # install mode: keep unrelated entries, replace managed ones with desired set.

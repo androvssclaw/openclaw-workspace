@@ -16,6 +16,7 @@ run(){
 
 run "health thresholds" ./scripts/health_check_thresholds.sh
 run "task next" ./scripts/task.sh next
+run "task lint" ./scripts/task.sh lint
 run "status short" ./scripts/status_short.sh
 run "smoke check" ./scripts/smoke_check.sh
 run "reminder audit" ./scripts/reminder_audit.sh
