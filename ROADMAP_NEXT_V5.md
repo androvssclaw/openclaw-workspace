@@ -11,8 +11,8 @@ _Версия: 2026-05-01_
 - [x] Добавить автопочинку безопасных кейсов (`--fix`) без изменения смысла задач.
 
 ## 3) Release evidence pack
-- [ ] Добавить `scripts/release_evidence.sh` (test_harness + hardening dry-run + ops краткий срез в один артефакт).
-- [ ] Подключить к PR summary ссылку/вставку evidence блока.
+- [x] Добавить `scripts/release_evidence.sh` (test_harness + hardening dry-run + ops краткий срез в один артефакт).
+- [x] Подключить к PR summary ссылку/вставку evidence блока.
 
 ## Done when
 - Один запуск поднимает/валидирует cron-контур V5 без ручной правки.
