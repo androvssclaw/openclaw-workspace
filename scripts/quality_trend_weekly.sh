@@ -5,6 +5,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STATE_DIR="${ROOT}/state"
 mkdir -p "$STATE_DIR"
 
+SEND_ALERT=1
+if [[ "${1:-}" == "--no-alert" ]]; then
+  SEND_ALERT=0
+fi
+
 HISTORY_FILE="${STATE_DIR}/quality-trend-history.tsv"
 OUT_FILE="${STATE_DIR}/quality-trend-$(date -u +%G-%V).md"
 LAST_ALERT_WEEK_FILE="${STATE_DIR}/quality-trend-last-alert-week.txt"
@@ -17,14 +22,21 @@ ts="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
 latest_evidence="$(ls -1t "${STATE_DIR}"/release-evidence-*.md 2>/dev/null | head -n1 || true)"
 if [[ -z "$latest_evidence" ]]; then
-  echo "No release evidence found. Run ./scripts/release_evidence.sh first."
-  exit 1
+  overall="PASS"
+  th="FAIL"; hd="FAIL"; op="FAIL"
+  ./scripts/test_harness.sh >/dev/null 2>&1 && th="PASS"
+  ./scripts/production_hardening_dry_run.sh >/dev/null 2>&1 && hd="PASS"
+  ./scripts/ops_brief.sh >/dev/null 2>&1 && op="PASS"
+  if [[ "$th" != "PASS" || "$hd" != "PASS" || "$op" != "PASS" ]]; then
+    overall="FAIL"
+  fi
+  latest_evidence="(synthetic:no-release-evidence)"
+else
+  overall="$(grep -E '^- Overall:' "$latest_evidence" | sed 's/^- Overall: //' | tr -d '*')"
+  th="$(grep -E '^authoritative_status:' "$latest_evidence" | sed -n '1p' | awk '{print $2}')"
+  hd="$(grep -E '^authoritative_status:' "$latest_evidence" | sed -n '2p' | awk '{print $2}')"
+  op="$(grep -E '^authoritative_status:' "$latest_evidence" | sed -n '3p' | awk '{print $2}')"
 fi
-
-overall="$(grep -E '^- Overall:' "$latest_evidence" | sed 's/^- Overall: //' | tr -d '*')"
-th="$(grep -E '^authoritative_status:' "$latest_evidence" | sed -n '1p' | awk '{print $2}')"
-hd="$(grep -E '^authoritative_status:' "$latest_evidence" | sed -n '2p' | awk '{print $2}')"
-op="$(grep -E '^authoritative_status:' "$latest_evidence" | sed -n '3p' | awk '{print $2}')"
 
 score=0
 [[ "$th" == "PASS" ]] && score=$((score+1))
@@ -81,7 +93,7 @@ fi
   fi
 } > "$OUT_FILE"
 
-if [[ $degraded -eq 1 ]]; then
+if [[ $degraded -eq 1 && $SEND_ALERT -eq 1 ]]; then
   last_alert_week=""
   [[ -f "$LAST_ALERT_WEEK_FILE" ]] && last_alert_week="$(cat "$LAST_ALERT_WEEK_FILE" 2>/dev/null || true)"
   if [[ "$last_alert_week" != "$week" ]]; then
@@ -89,6 +101,10 @@ if [[ $degraded -eq 1 ]]; then
     openclaw message send --channel "$ALERT_CHANNEL" --target "$ALERT_TARGET" --message "$msg" >/dev/null
     echo "$week" > "$LAST_ALERT_WEEK_FILE"
   fi
+fi
+
+if [[ $degraded -eq 1 && $SEND_ALERT -eq 0 ]]; then
+  echo "Alert suppressed (--no-alert): ${reason}"
 fi
 
 echo "Saved: $OUT_FILE"

@@ -20,6 +20,7 @@ run "task lint" ./scripts/task.sh lint
 run "status short" ./scripts/status_short.sh
 run "smoke check" ./scripts/smoke_check.sh
 run "reminder audit" ./scripts/reminder_audit.sh
+run "quality trend (no-alert)" ./scripts/quality_trend_weekly.sh --no-alert
 
 echo "Result: PASS=$pass FAIL=$fail"
 [[ $fail -eq 0 ]]

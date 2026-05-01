@@ -69,7 +69,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/pr_sync.sh` — create/update PR для `bot/updates-init`
 - `./scripts/git_auto_push_and_pr.sh "msg"` — commit+push+PR sync одним запуском
 - `./scripts/release_evidence.sh` — единый evidence-артефакт для релиза (tests + hardening + ops)
-- `./scripts/quality_trend_weekly.sh` — weekly quality trend (score + деградация, alert only on regression)
+- `./scripts/quality_trend_weekly.sh [--no-alert]` — weekly quality trend (score + деградация, alert only on regression)
 - `./scripts/runbook_drill.sh` — monthly runbook drill snapshot
 - `./scripts/task_followup_cron.sh` — daily follow-up по открытым задачам (throttled)
 - `./scripts/weekly_progress_review.sh` — weekly progress review с action items
@@ -131,7 +131,10 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `ROADMAP_NEXT` — выполнен
 - `ROADMAP_NEXT_V2` — выполнен (полный проход)
 - `ROADMAP_NEXT_V3` — выполнен (полный проход)
-- `V4 (stabilization + product mode)` — in progress, базовые пункты внедрены
+- `V4 (stabilization + product mode)` — выполнен
+- `V5` — выполнен
+- `V6` — выполнен
+- `V6.1` — выполнен
 
 ## 9) Быстрые примеры (до/после)
 - Было: `./scripts/task.sh next`
