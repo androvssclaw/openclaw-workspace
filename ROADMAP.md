@@ -81,3 +81,18 @@ _Версия: 2026-04-29_
 - [x] Alert tuning: CRIT cooldown + daily health digest
 - [x] PR/Release flow: test_harness gate + PR summary/risk hints
 - [x] Docs/Runbooks polish: quick runbook + README sync
+
+## V5 — Reliability Envelope + Task Guardrails (2026-05-01)
+- [x] Единая idempotent установка/проверка cron-набора (`setup_v5_cron.sh`)
+- [x] Task lint + safe autofix (`task.sh lint --fix`)
+- [x] Release evidence pack + integration в PR summary
+
+## V6 — Quality Gates + Evidence Visibility (2026-05-01)
+- [x] `task.sh lint` включен в `test_harness`
+- [x] Release evidence summary добавлен в `weekly_digest`
+- [x] `setup_v5_cron.sh dry-run` (diff preview)
+
+## V6.1 — Quality Trend Monitoring (2026-05-01)
+- [x] Weekly quality trend report (`quality_trend_weekly.sh` + history)
+- [x] Quality trend section в weekly digest
+- [x] Alert only on regression (degradation-only notifications)
