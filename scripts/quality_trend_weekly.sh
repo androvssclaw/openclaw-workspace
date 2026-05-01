@@ -24,7 +24,7 @@ latest_evidence="$(ls -1t "${STATE_DIR}"/release-evidence-*.md 2>/dev/null | hea
 if [[ -z "$latest_evidence" ]]; then
   overall="PASS"
   th="FAIL"; hd="FAIL"; op="FAIL"
-  ./scripts/test_harness.sh >/dev/null 2>&1 && th="PASS"
+  ./scripts/health_check_thresholds.sh >/dev/null 2>&1 && th="PASS"
   ./scripts/production_hardening_dry_run.sh >/dev/null 2>&1 && hd="PASS"
   ./scripts/ops_brief.sh >/dev/null 2>&1 && op="PASS"
   if [[ "$th" != "PASS" || "$hd" != "PASS" || "$op" != "PASS" ]]; then
