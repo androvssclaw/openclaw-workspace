@@ -55,7 +55,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/production_hardening_dry_run.sh` — dry-run цепочка weekly/monthly сценариев
 - `./scripts/kpi_weekly.sh` — weekly KPI snapshot
 - `./scripts/health_digest_daily.sh` — daily health digest (агрегат шум/статус)
-- `./scripts/cron_drift_guard.sh` — контроль drift cron-набора (alert only on state change)
+- `./scripts/cron_drift_guard.sh [--auto-heal]` — контроль drift cron-набора (+ optional auto-heal с cooldown)
 
 ### 4.3 Deploy и обслуживание
 - `./scripts/deploy.sh --confirm DEPLOY` — safe deploy (только clean tree)
@@ -93,7 +93,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 ## 5) Cron-процессы
 - Каждые 15 минут: `health_alert_cron.sh` (алерт в Telegram при смене статуса)
 - Daily digest (рекомендуемо 1 раз/день): `health_digest_daily.sh`
-- Ежедневно 06:05 UTC: `cron_drift_guard.sh`
+- Ежедневно 06:05 UTC: `cron_drift_guard.sh --auto-heal`
 - Ежедневно 09:30 UTC: `task_followup_cron.sh`
 - Ежедневно 06:10 UTC: `daily_ops_summary.sh`
 - Ежедневно 06:20 UTC: `daily_planning.sh`

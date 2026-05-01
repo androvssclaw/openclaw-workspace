@@ -8,7 +8,7 @@ trap 'rm -f "$TMP"' EXIT
 read -r -d '' DESIRED <<'EOF' || true
 */15 * * * * cd "${HOME}/.openclaw/workspace" && ./scripts/health_alert_cron.sh >> ./state/health_alert_cron.log 2>&1
 45 6 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/health_digest_daily.sh >> ./state/health_digest_daily.log 2>&1
-5 6 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/cron_drift_guard.sh >> ./state/cron_drift_guard_cron.log 2>&1
+5 6 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/cron_drift_guard.sh --auto-heal >> ./state/cron_drift_guard_cron.log 2>&1
 10 6 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/daily_ops_summary.sh >> ./state/daily_ops_summary_cron.log 2>&1
 20 6 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/daily_planning.sh >> ./state/daily_planning_cron.log 2>&1
 30 6 * * 1 cd "${HOME}/.openclaw/workspace" && ./scripts/weekly_ops_review.sh >> ./state/weekly_ops_review_cron.log 2>&1

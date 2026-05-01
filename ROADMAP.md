@@ -104,3 +104,8 @@ _Версия: 2026-04-29_
 ## V6.4 — Cron Drift Guard (2026-05-01)
 - [x] Добавлен `cron_drift_guard.sh` (дрейф/восстановление только по смене состояния)
 - [x] Подключен ежедневный запуск через `setup_v5_cron.sh`
+
+## V6.5 — Cron Drift Auto-Heal (2026-05-01)
+- [x] Добавлен `--auto-heal` режим в `cron_drift_guard.sh`
+- [x] Добавлен cooldown для heal-попыток (по умолчанию 6 часов)
+- [x] В weekly digest добавлена статистика drift/heal за 7 дней
