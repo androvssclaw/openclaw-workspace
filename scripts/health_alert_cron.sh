@@ -13,11 +13,13 @@ export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUN
 LAST_STATUS_FILE="${STATE_DIR}/health_alert_last_status.txt"
 LOG_FILE="${STATE_DIR}/health_alert.log"
 STREAK_FILE="${STATE_DIR}/health_alert_streak.txt"
+LAST_CRIT_SENT_EPOCH_FILE="${STATE_DIR}/health_alert_last_crit_sent_epoch.txt"
 
 ALERT_CHANNEL="${ALERT_CHANNEL:-telegram}"
 ALERT_TARGET="${ALERT_TARGET:-160093873}"
 SUPPRESS_NIGHT_FROM_HOUR_UTC="${SUPPRESS_NIGHT_FROM_HOUR_UTC:-23}"
 SUPPRESS_NIGHT_TO_HOUR_UTC="${SUPPRESS_NIGHT_TO_HOUR_UTC:-8}"
+CRIT_COOLDOWN_SECONDS="${CRIT_COOLDOWN_SECONDS:-3600}"
 
 set +e
 output="$("${ROOT}/scripts/health_check_thresholds.sh" 2>&1)"
@@ -55,7 +57,23 @@ if [[ "$new_status" == "WARN" || "$new_status" == "CRIT" ]]; then
   min_streak=2
 fi
 
+should_send=0
 if [[ "$new_status" != "$last_status" && $streak -ge $min_streak ]]; then
+  should_send=1
+fi
+
+if [[ "$new_status" == "CRIT" && "$last_status" == "CRIT" ]]; then
+  now_epoch="$(date -u +%s)"
+  last_crit_sent_epoch=0
+  if [[ -f "$LAST_CRIT_SENT_EPOCH_FILE" ]]; then
+    last_crit_sent_epoch="$(cat "$LAST_CRIT_SENT_EPOCH_FILE" 2>/dev/null || echo 0)"
+  fi
+  if (( now_epoch - last_crit_sent_epoch >= CRIT_COOLDOWN_SECONDS )); then
+    should_send=1
+  fi
+fi
+
+if [[ $should_send -eq 1 ]]; then
   hour_utc="$(date -u +%H)"
   quiet_window=0
   if (( 10#$hour_utc >= SUPPRESS_NIGHT_FROM_HOUR_UTC || 10#$hour_utc < SUPPRESS_NIGHT_TO_HOUR_UTC )); then
@@ -66,8 +84,15 @@ if [[ "$new_status" != "$last_status" && $streak -ge $min_streak ]]; then
   if [[ "$new_status" == "WARN" && $quiet_window -eq 1 ]]; then
     echo "[$now] warn suppressed by quiet window" >> "$LOG_FILE"
   else
-  msg="🚨 OpenClaw health status changed: ${last_status} -> ${new_status}\nTime: ${now}\n\n${output}"
+  if [[ "$new_status" == "$last_status" && "$new_status" == "CRIT" ]]; then
+    msg="🚨 OpenClaw health status still CRIT (cooldown elapsed)\nTime: ${now}\n\n${output}"
+  else
+    msg="🚨 OpenClaw health status changed: ${last_status} -> ${new_status}\nTime: ${now}\n\n${output}"
+  fi
   openclaw message send --channel "$ALERT_CHANNEL" --target "$ALERT_TARGET" --message "$msg" >/dev/null
+  if [[ "$new_status" == "CRIT" ]]; then
+    date -u +%s > "$LAST_CRIT_SENT_EPOCH_FILE"
+  fi
   fi
 fi
 

@@ -29,6 +29,8 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/task.sh done <id|text>` — закрыть задачу
 - `./scripts/task.sh prio <id> <p1|p2|p3>` — выставить приоритет
 - `./scripts/task.sh due <id> <YYYY-MM-DD>` — выставить дедлайн
+- `./scripts/task.sh ctx <id> <work|home|errands>` — выставить контекст
+- `./scripts/task.sh edit <id> [p1|p2|p3] [YYYY-MM-DD] [work|home|errands]` — массовое редактирование полей
 - `./scripts/task.sh next [work|home|errands]` — предложить следующую задачу с учетом контекста
 - `./scripts/focus.sh [count]` — top-N фокус задач
 - `./scripts/today.sh` — сводка дня (задачи + health + reminders)
@@ -49,7 +51,9 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/reminder_audit.sh` — проверка просроченных one-shot reminders
 - `./scripts/reminder_weekly_audit.sh` — weekly audit reminders
 - `./scripts/test_harness.sh` — мини test harness (PASS/FAIL)
+- `./scripts/production_hardening_dry_run.sh` — dry-run цепочка weekly/monthly сценариев
 - `./scripts/kpi_weekly.sh` — weekly KPI snapshot
+- `./scripts/health_digest_daily.sh` — daily health digest (агрегат шум/статус)
 
 ### 4.3 Deploy и обслуживание
 - `./scripts/deploy.sh --confirm DEPLOY` — safe deploy (только clean tree)
@@ -83,6 +87,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 
 ## 5) Cron-процессы
 - Каждые 15 минут: `health_alert_cron.sh` (алерт в Telegram при смене статуса)
+- Daily digest (рекомендуемо 1 раз/день): `health_digest_daily.sh`
 - Ежедневно 09:30 UTC: `task_followup_cron.sh`
 - Ежедневно 06:10 UTC: `daily_ops_summary.sh`
 - Ежедневно 06:20 UTC: `daily_planning.sh`
@@ -105,6 +110,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - Heartbeat-checklist: `HEARTBEAT.md`
 - Формат ответов команд: `docs/COMMAND_OUTPUT_STYLE.md`
 - Troubleshooting FAQ: `docs/TROUBLESHOOTING_FAQ.md`
+- Quick runbook: `docs/RUNBOOK_QUICK_ACTIONS.md`
 
 ## 7) Git policy
 - Ветка работы: `bot/updates-init`
@@ -120,6 +126,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `ROADMAP_NEXT` — выполнен
 - `ROADMAP_NEXT_V2` — выполнен (полный проход)
 - `ROADMAP_NEXT_V3` — выполнен (полный проход)
+- `V4 (stabilization + product mode)` — in progress, базовые пункты внедрены
 
 ## 9) Быстрые примеры (до/после)
 - Было: `./scripts/task.sh next`

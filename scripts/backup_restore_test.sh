@@ -108,9 +108,17 @@ MANIFEST_FILE="${MANIFEST_DIR}/$(basename "$ARCHIVE").list.txt"
       echo "restore-sample: FAIL (empty archive)"
       exit 1
     fi
-    printf '%s\n' "${SAMPLE[@]}" > "$TMP/sample.list"
-    tar -xzf "$ARCHIVE" -C "$TMP" -T "$TMP/sample.list"
-    echo "restore-sample: PASS (${#SAMPLE[@]} entries extracted to temp dir)"
+    extracted=0
+    for entry in "${SAMPLE[@]}"; do
+      if tar -xzf "$ARCHIVE" -C "$TMP" "$entry" >/dev/null 2>&1; then
+        extracted=$((extracted+1))
+      fi
+    done
+    if [[ $extracted -eq 0 ]]; then
+      echo "restore-sample: FAIL (sample entries could not be extracted)"
+      exit 1
+    fi
+    echo "restore-sample: PASS (${extracted}/${#SAMPLE[@]} entries extracted to temp dir)"
   else
     echo "restore-sample: SKIP (dry-run)"
   fi
