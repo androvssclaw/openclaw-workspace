@@ -18,12 +18,13 @@ read -r -d '' DESIRED <<'EOF' || true
 39 6 * * 1 cd "${HOME}/.openclaw/workspace" && ./scripts/memory_review.sh >> ./state/memory_review_cron.log 2>&1
 40 6 * * 1 cd "${HOME}/.openclaw/workspace" && ./scripts/decision_log_weekly.sh >> ./state/decision_log_cron.log 2>&1
 41 6 * * 1 cd "${HOME}/.openclaw/workspace" && ./scripts/kpi_weekly.sh >> ./state/kpi_weekly_cron.log 2>&1
+42 6 * * 1 cd "${HOME}/.openclaw/workspace" && ./scripts/quality_trend_weekly.sh >> ./state/quality_trend_weekly_cron.log 2>&1
 30 9 * * * cd "${HOME}/.openclaw/workspace" && ./scripts/task_followup_cron.sh >> ./state/task_followup_cron.log 2>&1
 40 6 1 * * cd "${HOME}/.openclaw/workspace" && ./scripts/runbook_drill.sh >> ./state/runbook_drill_cron.log 2>&1
 20 3 1 * * cd "${HOME}/.openclaw/workspace" && ./scripts/restore_test_cron.sh >> ./state/restore_test_cron.log 2>&1
 EOF
 
-managed_pattern='scripts/(health_alert_cron|health_digest_daily|daily_ops_summary|daily_planning|weekly_ops_review|weekly_progress_review|slo_weekly_check|reminder_weekly_audit|weekly_digest|memory_review|decision_log_weekly|kpi_weekly|task_followup_cron|runbook_drill|restore_test_cron)\.sh'
+managed_pattern='scripts/(health_alert_cron|health_digest_daily|daily_ops_summary|daily_planning|weekly_ops_review|weekly_progress_review|slo_weekly_check|reminder_weekly_audit|weekly_digest|memory_review|decision_log_weekly|kpi_weekly|quality_trend_weekly|task_followup_cron|runbook_drill|restore_test_cron)\.sh'
 
 current="$(crontab -l 2>/dev/null || true)"
 

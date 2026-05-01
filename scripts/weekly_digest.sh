@@ -44,6 +44,18 @@ health="$(cd "$ROOT" && ./scripts/health_check_thresholds.sh 2>/dev/null || true
     echo "- Evidence not found yet (run ./scripts/release_evidence.sh)"
   fi
   echo
+  echo "## Quality trend"
+  latest_trend="$(ls -1t "${ROOT}"/state/quality-trend-*.md 2>/dev/null | head -n1 || true)"
+  if [[ -n "${latest_trend}" ]]; then
+    trend_score="$(grep -E '^- Score:' "${latest_trend}" | sed 's/^- Score: //')"
+    trend_prev="$(grep -E '^- Previous week:' "${latest_trend}" | sed 's/^- Previous week: //')"
+    echo "- Latest report: ${latest_trend}"
+    echo "- Score: ${trend_score:-unknown}"
+    [[ -n "${trend_prev}" ]] && echo "- Previous: ${trend_prev}"
+  else
+    echo "- Trend not found yet (run ./scripts/quality_trend_weekly.sh)"
+  fi
+  echo
   echo "## Risks"
   echo "- Review overdue reminders via ./scripts/reminder_audit.sh"
   echo

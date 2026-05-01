@@ -69,6 +69,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/pr_sync.sh` — create/update PR для `bot/updates-init`
 - `./scripts/git_auto_push_and_pr.sh "msg"` — commit+push+PR sync одним запуском
 - `./scripts/release_evidence.sh` — единый evidence-артефакт для релиза (tests + hardening + ops)
+- `./scripts/quality_trend_weekly.sh` — weekly quality trend (score + деградация, alert only on regression)
 - `./scripts/runbook_drill.sh` — monthly runbook drill snapshot
 - `./scripts/task_followup_cron.sh` — daily follow-up по открытым задачам (throttled)
 - `./scripts/weekly_progress_review.sh` — weekly progress review с action items
@@ -102,6 +103,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - Понедельник 06:39 UTC: `memory_review.sh`
 - Понедельник 06:40 UTC: `decision_log_weekly.sh`
 - Понедельник 06:41 UTC: `kpi_weekly.sh`
+- Понедельник 06:42 UTC: `quality_trend_weekly.sh`
 - 1-е число месяца 06:40 UTC: `runbook_drill.sh`
 - 1-е число месяца 03:20 UTC: `restore_test_cron.sh`
 - VPN-monitoring: отдельные cron-задачи (`vpn_health_cron.sh`, `vpn_daily_summary.sh`)
