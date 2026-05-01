@@ -34,6 +34,7 @@ usage() {
   ./scripts/task.sh edit <id> [p1|p2|p3] [YYYY-MM-DD] [work|home|errands]
   ./scripts/task.sh done <ID_задачи_или_номер_по_списку_или_часть_текста>
   ./scripts/task.sh next [work|home|errands]
+  ./scripts/task.sh lint [--fix]
   ./scripts/task.sh list
 
 Примеры:
@@ -47,6 +48,7 @@ usage() {
   ./scripts/task.sh done 23
   ./scripts/task.sh done "DNS"
   ./scripts/task.sh next work
+  ./scripts/task.sh lint --fix
 EOF
 }
 
@@ -232,6 +234,91 @@ edit_task() {
     echo "Ошибка: edit требует хотя бы один параметр: p1|p2|p3, YYYY-MM-DD, work|home|errands"
     exit 1
   fi
+}
+
+lint_tasks() {
+  local fix="${1:-}"
+  python3 - "$TASKS_FILE" "$fix" <<'PY'
+import re,sys,datetime
+from pathlib import Path
+
+path=Path(sys.argv[1])
+fix=(sys.argv[2] == '--fix')
+lines=path.read_text(encoding='utf-8').splitlines()
+seen={}
+issues=0
+changed=False
+
+def normalize_text(s:str)->str:
+    s=re.sub(r'\bp[1-3]\b','',s,flags=re.I)
+    s=re.sub(r'\bdue:[^\s]+\b','',s,flags=re.I)
+    s=re.sub(r'\bctx:[^\s]+\b','',s,flags=re.I)
+    s=re.sub(r'\s+',' ',s).strip().lower()
+    return s
+
+for i,l in enumerate(lines):
+    if not l.startswith('- [ ]'):
+        continue
+    body=l[len('- [ ] '):]
+
+    due_tags=re.findall(r'\bdue:([^\s]+)\b', body, flags=re.I)
+    ctx_tags=re.findall(r'\bctx:([^\s]+)\b', body, flags=re.I)
+
+    valid_due=[]
+    bad_due=[]
+    for d in due_tags:
+        try:
+            datetime.date.fromisoformat(d)
+            valid_due.append(d)
+        except Exception:
+            bad_due.append(d)
+
+    valid_ctx=[c.lower() for c in ctx_tags if c.lower() in ('work','home','errands')]
+    bad_ctx=[c for c in ctx_tags if c.lower() not in ('work','home','errands')]
+
+    if len(due_tags) > 1:
+        issues += 1
+        print(f"ISSUE line {i+1}: duplicate due tags")
+    if bad_due:
+        issues += 1
+        print(f"ISSUE line {i+1}: invalid due tags: {', '.join(bad_due)}")
+    if len(ctx_tags) > 1:
+        issues += 1
+        print(f"ISSUE line {i+1}: duplicate ctx tags")
+    if bad_ctx:
+        issues += 1
+        print(f"ISSUE line {i+1}: invalid ctx tags: {', '.join(bad_ctx)}")
+
+    key=normalize_text(body)
+    if key:
+        if key in seen:
+            issues += 1
+            print(f"ISSUE line {i+1}: possible duplicate of line {seen[key]}")
+        else:
+            seen[key]=i+1
+
+    if fix and (len(due_tags)>1 or bad_due or len(ctx_tags)>1 or bad_ctx):
+        base=re.sub(r'\bdue:[^\s]+\b','',body,flags=re.I)
+        base=re.sub(r'\bctx:[^\s]+\b','',base,flags=re.I)
+        base=re.sub(r'\s+',' ',base).strip()
+        if valid_due:
+            base=f"{base} due:{valid_due[-1]}".strip()
+        if valid_ctx:
+            base=f"{base} ctx:{valid_ctx[-1]}".strip()
+        lines[i]=f"- [ ] {base}"
+        changed=True
+
+if fix and changed:
+    path.write_text("\n".join(lines).rstrip()+"\n",encoding='utf-8')
+    print("FIX: applied safe normalization for due/ctx tags")
+
+if issues == 0:
+    print("OK: no task lint issues")
+    raise SystemExit(0)
+else:
+    print(f"Found issues: {issues}")
+    raise SystemExit(1)
+PY
 }
 
 normalize_group() {
@@ -536,6 +623,9 @@ main() {
       ;;
     next)
       next_task "${2:-}"
+      ;;
+    lint)
+      lint_tasks "${2:-}"
       ;;
     list|"")
       ./scripts/tasks.sh

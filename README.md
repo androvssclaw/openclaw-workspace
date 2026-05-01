@@ -32,6 +32,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/task.sh ctx <id> <work|home|errands>` — выставить контекст
 - `./scripts/task.sh edit <id> [p1|p2|p3] [YYYY-MM-DD] [work|home|errands]` — массовое редактирование полей
 - `./scripts/task.sh next [work|home|errands]` — предложить следующую задачу с учетом контекста
+- `./scripts/task.sh lint [--fix]` — проверка/автопочинка metadata-тегов задач (`due/ctx`)
 - `./scripts/focus.sh [count]` — top-N фокус задач
 - `./scripts/today.sh` — сводка дня (задачи + health + reminders)
 - `./scripts/remind.sh <when> <message>` — одноразовое напоминание
@@ -70,6 +71,7 @@ _Актуально на 2026-04-30 22:20 UTC_
 - `./scripts/runbook_drill.sh` — monthly runbook drill snapshot
 - `./scripts/task_followup_cron.sh` — daily follow-up по открытым задачам (throttled)
 - `./scripts/weekly_progress_review.sh` — weekly progress review с action items
+- `./scripts/setup_v5_cron.sh [install|check]` — единая idempotent установка/проверка полного cron-набора
 
 ### 4.4 Backup и восстановление
 - `./scripts/backup_important.sh`
