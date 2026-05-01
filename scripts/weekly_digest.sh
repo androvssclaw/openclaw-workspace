@@ -56,6 +56,46 @@ health="$(cd "$ROOT" && ./scripts/health_check_thresholds.sh 2>/dev/null || true
     echo "- Trend not found yet (run ./scripts/quality_trend_weekly.sh)"
   fi
   echo
+  echo "## Cron drift"
+  drift_stats="$(python3 - <<'PY'
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+import re
+
+log=Path("state/cron_drift_guard.log")
+if not log.exists():
+    print("incidents=0\nauto_heal_success=0\nauto_heal_failed=0")
+    raise SystemExit
+
+cutoff=datetime.now(timezone.utc)-timedelta(days=7)
+inc=0; ok=0; fail=0
+for line in log.read_text(encoding='utf-8', errors='ignore').splitlines():
+    m=re.match(r'\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC\]\s+(.*)$', line)
+    if not m:
+        continue
+    try:
+        ts=datetime.strptime(m.group(1), "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+    except Exception:
+        continue
+    if ts < cutoff:
+        continue
+    rest=m.group(2)
+    if "status=DRIFT" in rest:
+        inc += 1
+    if "heal_result=success" in rest:
+        ok += 1
+    if "heal_result=failed" in rest:
+        fail += 1
+
+print(f"incidents={inc}")
+print(f"auto_heal_success={ok}")
+print(f"auto_heal_failed={fail}")
+PY
+)"
+  echo "- Last 7d incidents: $(grep '^incidents=' <<<"$drift_stats" | cut -d= -f2)"
+  echo "- Auto-heal success: $(grep '^auto_heal_success=' <<<"$drift_stats" | cut -d= -f2)"
+  echo "- Auto-heal failed: $(grep '^auto_heal_failed=' <<<"$drift_stats" | cut -d= -f2)"
+  echo
   echo "## Risks"
   echo "- Review overdue reminders via ./scripts/reminder_audit.sh"
   echo
