@@ -72,3 +72,12 @@ _Версия: 2026-04-29_
 - [x] Прокачка “мозга”: память, стиль, проактивность (базовый playbook + MEMORY.md + weekly scorecard)
 - [x] Расширение команд под личные сценарии (focus/today/task next/ops brief/cleanup)
 - [x] Улучшение README как живого архитектурного документа
+
+---
+
+## V4 — Stabilization + Product Mode (2026-05-01)
+- [x] Production hardening: dry-run цепочка weekly/monthly + edge-case фиксы
+- [x] Task UX 3.0: `ctx`, `edit`, smarter `next` (overdue + age)
+- [x] Alert tuning: CRIT cooldown + daily health digest
+- [x] PR/Release flow: test_harness gate + PR summary/risk hints
+- [x] Docs/Runbooks polish: quick runbook + README sync
