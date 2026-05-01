@@ -28,6 +28,22 @@ health="$(cd "$ROOT" && ./scripts/health_check_thresholds.sh 2>/dev/null || true
     echo "- KPI snapshot not generated yet (run ./scripts/kpi_weekly.sh)"
   fi
   echo
+  echo "## Release evidence"
+  latest_evidence="$(ls -1t "${ROOT}"/state/release-evidence-*.md 2>/dev/null | head -n1 || true)"
+  if [[ -n "${latest_evidence}" ]]; then
+    overall="$(grep -E '^- Overall:' "${latest_evidence}" | sed 's/^- Overall: //')"
+    th="$(grep -E '^authoritative_status:' "${latest_evidence}" | sed -n '1p' | awk '{print $2}')"
+    hd="$(grep -E '^authoritative_status:' "${latest_evidence}" | sed -n '2p' | awk '{print $2}')"
+    op="$(grep -E '^authoritative_status:' "${latest_evidence}" | sed -n '3p' | awk '{print $2}')"
+    echo "- Latest file: ${latest_evidence}"
+    echo "- Overall: ${overall:-unknown}"
+    echo "- test_harness: ${th:-unknown}"
+    echo "- production_hardening_dry_run: ${hd:-unknown}"
+    echo "- ops_brief: ${op:-unknown}"
+  else
+    echo "- Evidence not found yet (run ./scripts/release_evidence.sh)"
+  fi
+  echo
   echo "## Risks"
   echo "- Review overdue reminders via ./scripts/reminder_audit.sh"
   echo
