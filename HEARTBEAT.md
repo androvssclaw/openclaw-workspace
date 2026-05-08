@@ -9,6 +9,9 @@
 ## Ping rules
 - Ping only for: completion, blocker, time-sensitive risk, upcoming commitment.
 - Avoid repetitive "no changes" updates.
+- For `[OpenClaw heartbeat poll]` with no meaningful user update: return exactly `NO_REPLY`.
+- If heartbeat produced a real update (completion/blocker/risk), send a normal reply instead of `NO_REPLY`.
+- Do not send `HEARTBEAT_OK` in Telegram direct chats.
 
 ## Weekly maintenance
 - Run `scripts/weekly_scorecard.sh`.
